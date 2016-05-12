@@ -1,0 +1,82 @@
+﻿"lang"
+{
+	"Language"		"English"
+	"Tokens"
+	{		
+		"game_mode_15"				"ESCAPETEST"
+		"addon_game_name"			"ESCAPETEST"
+		
+		//"DOTA_Basics"							"ABILITIES"
+		//"DOTA_Upgrades"							"ITEMS"
+		//"DOTA_Shop_Category_Basics"				"ABILITIES"
+		//"DOTA_Shop_Category_Upgrades"			"ITEMS"
+		
+		//--------------------
+		//Abilities
+		//--------------------
+		"DOTA_Tooltip_ability_example_ability"										"Detonation"
+		"DOTA_Tooltip_ability_example_ability_Description"				"Detonator channels a charge and releases an explosion around the caster if the channel is successful, dealing damage and knocking back all enemies in range of the explosion"
+		"DOTA_Tooltip_ability_example_ability_Lore"								""
+		"DOTA_Tooltip_ability_example_ability_duration"							"DURATION:"
+    	"DOTA_Tooltip_ability_example_ability_radius"							"RADIUS:"
+    	"DOTA_Tooltip_ability_example_ability_distance"							"KNOCKBACK DISTANCE:"
+    	"DOTA_Tooltip_ability_example_ability_height"							"KNOCKBACK HEIGHT:"
+		
+		"DOTA_Tooltip_ability_gate_unit_passive"						"Feast for Mangos"
+		"DOTA_Tooltip_ability_gate_unit_passive_Description"			"Will step aside as a bouncer once full"
+
+		"DOTA_Tooltip_ability_phase_shift_custom"						"Phase Shift"
+		"DOTA_Tooltip_ability_phase_shift_custom_Description"			"Puck briefly shifts into another dimension where it is immune from harm"
+
+		"DOTA_Tooltip_ability_escapetest_empty1"						"Empty Ability"
+		"DOTA_Tooltip_ability_escapetest_empty2"						"Empty Ability"
+		"DOTA_Tooltip_ability_escapetest_empty3"						"Empty Ability"
+		"DOTA_Tooltip_ability_escapetest_empty4"						"Empty Ability"
+		"DOTA_Tooltip_ability_escapetest_empty5"						"Empty Ability"
+		"DOTA_Tooltip_ability_escapetest_empty6"						"Empty Ability"
+
+		"DOTA_Tooptip_ability_gale_custom"								"Venomous Gale"
+		"DOTA_Tooptip_ability_gale_custom_Description"					""
+		"DOTA_Tooptip_modifier_poison_slow"								"Venomous Gale Slow"
+		"DOTA_Tooptip_modifier_poison_slow_Description"					""
+		
+		//------------------------
+		// Items
+		//------------------------
+		"DOTA_Tooltip_ability_item_example_item"						"Shield Blaster"
+		"DOTA_Tooltip_ability_item_example_item_Description"			"Gives the caster a 50% damage reduction for 4 seconds while firing a projectile that deals damage 125 PURE damage to any enemy it hits."
+		"DOTA_Tooltip_ability_item_example_item_Lore"					""
+		"DOTA_Tooltip_ability_item_example_item_duration"				"DURATION:"
+    	"DOTA_Tooltip_ability_item_example_item_damage_reduction"		"DAMAGE REDUCTION:"
+    	"DOTA_Tooltip_ability_item_example_item_radius"					"PROJECTILE RADIUS:"
+    	"DOTA_Tooltip_ability_item_example_item_speed"					"PROJECTILE SPEED:"
+    	"DOTA_Tooltip_ability_item_example_item_distance"				"DISTANCE:"
+    	"DOTA_Tooltip_ability_item_example_item_damage"					"DAMAGE:"
+
+    	"DOTA_Tooltip_ability_item_mango_custom"						"Mango"
+    	"DOTA_Tooltip_ability_item_mango_custom_Description"			"Consume the mango to replenish mana, undead love mangos"
+    	"DOTA_Tooltip_ability_item_mango_custom_mana_amount"			"MANA RESTORED:"
+
+    	"DOTA_Tooltip_ability_item_stick"                               "Stick"
+    	"DOTA_Tooltip_ability_item_stick_Description"					"A really nice stick, too good to drop"
+		
+    	//------------------------
+		// Units
+		//------------------------
+		"npc_gate"														"Bouncer!"
+		"npc_pudge"														"Pudge!"
+		"npc_th_dragon"													"Dragon!"
+		"npc_creep_tombstone"											"Zombie!"
+		"npc_creep_patrol"												"Zombie!"
+		"npc_veno"														"Veno!"
+		"npc_pheonix"													"Phoenix!"
+		"npc_aggro"														"Naix!"
+
+
+    	//--------------------
+    	// Messages
+    	//--------------------
+    	"DOTA_Chat_PlayerDeniedSelf"          ""
+    	"DOTA_Chat_PlayerKilledGeneric"       ""
+	}
+}
