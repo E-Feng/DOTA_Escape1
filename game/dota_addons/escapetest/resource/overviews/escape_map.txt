@@ -1,0 +1,8 @@
+escape_map
+{
+	material materials/overviews/escape_map.vmat
+	pos_x -4096
+	pos_y 4096
+	scale 12.000
+}
+
