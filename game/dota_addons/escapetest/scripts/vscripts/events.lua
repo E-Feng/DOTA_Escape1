@@ -1050,7 +1050,7 @@ function EscapeTest:CartyThinker()
   local time = 17
   local mode = 1
   local modelimit = 4
-  local amtweighted = {1, 1, 1, 2, 2, 2, 3}
+  local amtweighted = {1, 1, 2, 2, 2, 2, 3}
   for i = 1,units do
     local xi = x1 + (i-1)*increment
     local unit = CreateUnitByName("npc_dota_badguys_siege", Vector(xi, pos1.y - movedist + 500, pos1.z), true, nil, nil, DOTA_TEAM_BADGUYS)
