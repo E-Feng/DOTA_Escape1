@@ -169,16 +169,17 @@ function EscapeTest:InitEscapeTest()
   
 
   -- Initializes variables and tables
-  Lives = 3
+  Lives = 4
   Players = {}
   DeadHeroPos = {}
   PartNum = {}
+  PartDummy = {}
   Extras = {}
   Parts = {}
   SunRayParts = {}
   MultVector = {}
   BoundsVector = {}
-  GameRules.CLevel = 1
+  GameRules.CLevel = 0
   GameRules.Checkpoint = Vector(0, 0, 0)
 
   TeamColors = {}

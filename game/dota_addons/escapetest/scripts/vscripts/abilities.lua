@@ -52,10 +52,10 @@ end
 function InvisCustom(event)
 	local caster = event.caster
 	local mindur = 1
-	local maxdur = 3
+	local maxdur = 2
 	Timers:CreateTimer(function()
 		if IsValidEntity(caster) then
-			local randwait = RandomFloat(0, 5)
+			local randwait = RandomFloat(1, 5)
 			local randduration = RandomFloat(mindur, maxdur)
 			Timers:CreateTimer(randwait, function()
 				caster:AddNewModifier(caster, nil, "modifier_invisible", {})

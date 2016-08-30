@@ -232,5 +232,20 @@
     "ItemDroppable"            "0"
     "ItemSellable"             "0"
     "ItemStackable"            "0"
+
+    "Modifiers"
+    {
+      "modifier_ability_layout"
+      {
+        "Passive"      "1"
+        "IsHidden"      "1"
+        "IsDebuff"      "0"
+    
+        "Properties"
+        {
+          "MODIFIER_PROPERTY_ABILITY_LAYOUT" "6"
+        }
+      }
+    }
   }
 }

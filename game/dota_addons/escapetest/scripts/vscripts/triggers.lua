@@ -26,29 +26,31 @@ function UpdateCheckpoint(trigger)
 	GameRules.Checkpoint = position
 	local name = trigblock:GetName()
 	local level = tonumber(string.sub(name, -1))
-	GameRules.CLevel = level
-	print("Checkpoint updated to:", position)
-	print("Level updated to:", level)
-	local msg = {
-                  message = "Level " .. tostring(level) .. "!",
-                  duration = 5.0
-                }
-    if level < 7 then
-    	FireGameEvent("show_center_message", msg)
+	if GameRules.CLevel ~= level then
+		GameRules.CLevel = level
+		print("Checkpoint updated to:", position)
+		print("Level updated to:", level)
+		local msg = {
+	                  message = "Level " .. tostring(level) .. "!",
+	                  duration = 5.0
+	                }
+	    if level < 7 then
+	    	FireGameEvent("show_center_message", msg)
+		end
+		if level > 1  and level < 7 then
+			EscapeTest:ReviveAll()
+			EscapeTest:CleanLevel(level-1)
+			EscapeTest:SpawnEntities(level)
+			EscapeTest:MoveCreeps(level, {})
+		elseif level == 7 then
+			Timers:CreateTimer(3, function()
+				GameRules:SetSafeToLeave(true)
+				GameRules:SetGameWinner(DOTA_TEAM_GOODGUYS)
+				GameRules:SetCustomVictoryMessage("You're winner!")
+			end)
+		end
+		print("---------UpdateCheckpoint trigger finished--------")
 	end
-	if level > 1  and level < 7 then
-		EscapeTest:ReviveAll()
-		EscapeTest:CleanLevel(level-1)
-		EscapeTest:SpawnEntities(level)
-		EscapeTest:MoveCreeps(level, {})
-	elseif level == 7 then
-		Timers:CreateTimer(3, function()
-			GameRules:SetSafeToLeave(true)
-			GameRules:SetGameWinner(DOTA_TEAM_GOODGUYS)
-			GameRules:SetCustomVictoryMessage("You're winner!")
-		end)
-	end
-	print("---------UpdateCheckpoint trigger finished--------")
 end
 
 function SurgeTrigger(trigger)
@@ -99,7 +101,19 @@ function SkillGive(trigger)
 	local trig = trigger.caller
 	trig.firsttouch = trig.firsttouch or 0
 	print("Switch activated, giving ability")
-	if hero:GetAbilityByIndex(1) == nil then
+	local firstabil = hero:GetAbilityByIndex(1)
+	if firstabil ~= nil then
+		print(firstabil:GetAbilityName())
+		if (firstabil:GetAbilityName() ~= "phase_shift_custom" and firstabil:GetAbilityName() ~= "escapetest_empty1") then
+			for i = 1,6 do
+				local abilremove = hero:GetAbilityByIndex(i)
+				if abilremove ~= nil then
+					hero:RemoveAbility(abilremove:GetAbilityName())
+				end
+			end
+		end
+	end
+	if firstabil == nil then
 		hero:AddAbility("phase_shift_custom"):SetLevel(1)
 		for i = 2,6 do
 			hero:AddAbility("escapetest_empty" .. i):SetLevel(1)
@@ -119,13 +133,21 @@ function SkillGive(trigger)
 end
 
 function SkillTake(trigger)
-	local trig = trigger.caller
+	--[[local trig = trigger.caller
 	local hero = trigger.activator
 	for i = 1,6 do
     	if hero:GetAbilityByIndex(i) ~= nil then
         	local abil = hero:GetAbilityByIndex(i):GetAbilityName()
         	hero:RemoveAbility(abil)
       	end
+	end]]
+	for i,hero in pairs(Players) do
+		for i = 1,6 do
+			if hero:GetAbilityByIndex(i) ~= nil then
+			 	local abil = hero:GetAbilityByIndex(i):GetAbilityName()
+			 	hero:RemoveAbility(abil)
+			end
+		end
 	end
 end
 

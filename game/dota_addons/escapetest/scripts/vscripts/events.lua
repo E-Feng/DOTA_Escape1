@@ -550,10 +550,13 @@ function EscapeTest:HeroKilled(hero, attacker, ability)
 
   -- Creates a particle at position and saves particleIdx into tables
   local part = BeaconPart[hero.id]
-  local beacon = ParticleManager:CreateParticle(part, PATTACH_ABSORIGIN, hero)
+  local dummy = CreateUnitByName("npc_dummy_unit", DeadHeroPos[playerIdx], true, nil, nil, DOTA_TEAM_GOODGUYS)
+  dummy:FindAbilityByName("dummy_unit"):SetLevel(1)
+  local beacon = ParticleManager:CreateParticle(part, PATTACH_ABSORIGIN, dummy)
   ParticleManager:SetParticleControl(beacon, 0, DeadHeroPos[playerIdx])
   PartNum[playerIdx] = beacon
-  --print("Particle Created: ", beacon, "under player ", playerIdx)
+  PartDummy[playerIdx] = dummy:GetEntityIndex()
+  --print("Particle Created: ", beacon, "under player ", playerIdx, "dummy index: ", PartDummy[playerIdx])
 end
 
 -- This function revives the hero once the thinker has found "contact"
@@ -574,9 +577,15 @@ function EscapeTest:HeroRevived(deadhero, alivehero)
   ParticleManager:DestroyParticle(partID, true)
   --print("Particle: ", partID, "destroyed after respawn")
 
-  -- Removes table entry of revived hero and particle
+  -- Removes table entry of revived hero, particle, and dummy
   DeadHeroPos[playerIdx] = nil
   PartNum[playerIdx] = nil
+
+  local dummy = EntIndexToHScript(PartDummy[playerIdx])
+  if dummy and dummy:IsAlive() then
+    dummy:RemoveSelf()
+  end
+  PartDummy[playerIdx] = nil
 end
 
 -- This function revives everyone when they all die at last checkpoint
@@ -634,21 +643,27 @@ function EscapeTest:CleanLevel(level)
   for _,entvals in pairs(EntList[level]) do
     if entvals[ENT_INDEX] ~= 0 then
       local ent = EntIndexToHScript(entvals[ENT_INDEX])
-      if ent and ent:IsAlive() then
-        if entvals[ENT_UNTIM] == 2 then
+      if ent ~= nil then
+        if entvals[ENT_UNTIM] == 2 and ent:IsAlive() then
           print("Ent", ent:GetUnitName(), "ID", entvals[ENT_INDEX], "removed")
           ent:RemoveSelf()
-        elseif entvals[ENT_UNTIM] == 1 then
-          print("Ent", ent:GetName(), "ID", entvals[ENT_INDEX], "removed")
-          ent:GetContainer():RemoveSelf()
-          ent:RemoveSelf()
+        elseif entvals[ENT_UNTIM] == 1 and ent:GetName() == "item_mango_custom" then
+          --print(ent, ent:GetClassname(), ent:GetName())
+          if ent:GetContainer() ~= nil then
+            print("Ent container", ent:GetName(), "ID", entvals[ENT_INDEX], "removed")
+            ent:GetContainer():RemoveSelf()
+          end
+          if ent ~= nil then
+            print("Ent", ent:GetName(), "ID", entvals[ENT_INDEX], "removed")
+            ent:RemoveSelf()
+          end
         end
       end
     end
   end
   for _,extra in pairs(Extras) do
     local ent = EntIndexToHScript(extra)
-    print("Ent ID", extra, "removed")
+    print("Ent ID", ent:GetUnitName(), extra, "removed")
     ent:RemoveSelf()
   end
   for _,part in pairs(Parts) do
@@ -747,10 +762,10 @@ function EscapeTest:RandomMangos()
     local item = CreateItem("item_mango_custom", nil, nil)
     CreateItemOnPositionSync(pos, item)
     if i <= numreal then
-      local rmango = {1, 1, item:GetEntityIndex(), "", false, true}
+      local rmango = {1, ENT_MANGO, item:GetEntityIndex(), "", false, true}
       table.insert(EntList[level], rmango)
     else
-      local fmango = {1, 1, item:GetEntityIndex(), "", false, false}
+      local fmango = {1, ENT_MANGO, item:GetEntityIndex(), "", false, false}
       table.insert(EntList[level], fmango)
     end
   end
@@ -797,12 +812,14 @@ function EscapeTest:RandomWanderUnits()
   local botright = BoundsVector[boundpos][2]
   local numspawn = 45
   for i = 1,numspawn do
-    local x = RandomFloat(topleft.x, botright.x)
-    local y = RandomFloat(topleft.y, botright.y)
-    local pos = Vector(x, y, 128)
-    local unit = CreateUnitByName("npc_creep_patrol", pos, true, nil, nil, DOTA_TEAM_BADGUYS)
-    EscapeTest:WanderThinker(unit)
-    table.insert(Extras, unit:GetEntityIndex())
+    Timers:CreateTimer(function()
+      local x = RandomFloat(topleft.x, botright.x)
+      local y = RandomFloat(topleft.y, botright.y)
+      local pos = Vector(x, y, 128)
+      local unit = CreateUnitByName("npc_creep_patrol", pos, true, nil, nil, DOTA_TEAM_BADGUYS)
+      EscapeTest:WanderThinker(unit)
+      table.insert(Extras, unit:GetEntityIndex())
+    end)
   end
 end
 
