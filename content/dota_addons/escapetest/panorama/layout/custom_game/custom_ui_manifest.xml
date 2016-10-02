@@ -49,9 +49,12 @@
     <!--<CustomUIElement type="Hud" layoutfile="file://{resources}/layout/custom_game/containers/container_base.xml" /-->
     <!--<CustomUIElement type="Hud" layoutfile="file://{resources}/layout/custom_game/barebones_progress.xml" /> -->
 
-    <!-- From Overthrow.
 
+    <!-- From Overthrow. 
         <CustomUIElement type="HudTopBar"           layoutfile="file://{resources}/layout/custom_game/multiteam_top_scoreboard.xml" />
+    -->
+
+    <!-- From Overthrow.   
         <CustomUIElement type="Hud"                 layoutfile="file://{resources}/layout/custom_game/overthrow_item_notification.xml" />
         <CustomUIElement type="GameSetup"           layoutfile="file://{resources}/layout/custom_game/team_select.xml" />
         <CustomUIElement type="FlyoutScoreboard"    layoutfile="file://{resources}/layout/custom_game/multiteam_flyout_scoreboard.xml" />
@@ -59,5 +62,6 @@
         <CustomUIElement type="EndScreen"           layoutfile="file://{resources}/layout/custom_game/multiteam_end_screen.xml" />
         <CustomUIElement type="GameInfo"            layoutfile="file://{resources}/layout/custom_game/overthrow_game_info.xml" />
     -->
+
   </Panel>
 </root>

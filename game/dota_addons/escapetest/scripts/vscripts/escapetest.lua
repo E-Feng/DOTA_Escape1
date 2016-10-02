@@ -122,6 +122,19 @@ function EscapeTest:OnHeroInGame(hero)
     print("PlayerIdx (", playerIdx, ") inserted into table")
     print("Table is now length ", TableLength(Players))
     print("----------Player insertion finished----------")
+
+    --[[ Experimental
+    playerCount = playerCount or 1
+    hero.playerNumber = playerCount
+    playerCount = playerCount + 1
+    print("Hero", hero:GetUnitName(), "is player number", tostring(hero.playerNumber))
+    if hero.playerNumber >= 6 then
+      print(hero:GetTeamNumber())
+      PlayerResource:SetCustomTeamAssignment(hero:GetPlayerID(), DOTA_TEAM_BADGUYS)
+      hero:SetTeam(DOTA_TEAM_BADGUYS)
+      print(hero:GetTeamNumber())
+    end
+    ]]
   end
 end
 

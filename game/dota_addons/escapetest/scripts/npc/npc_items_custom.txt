@@ -226,6 +226,7 @@
   // GG Branch
   "item_stick"
   {
+    "ID"                      "1002"
     "BaseClass"                 "item_datadriven"
     "AbilityTextureName"      "item_branches"
     "AbilityBehavior"        "DOTA_ABILITY_BEHAVIOR_PASSIVE"
