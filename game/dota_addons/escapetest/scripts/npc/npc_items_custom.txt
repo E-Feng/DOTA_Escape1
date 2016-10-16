@@ -249,4 +249,84 @@
       }
     }
   }
+
+  // Custom Cheese (extra life)
+  "item_cheese_custom"
+  {
+    // General
+    //----------------------------------------------------
+    "BaseClass"                 "item_datadriven"
+    "AbilityBehavior"        "DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_NO_TARGET"
+    "AbilityTextureName"         "item_cheese"
+    "Model"                      "models/props_gameplay/cheese.mdl"
+
+    "MaxUpgradeLevel"       "1"
+    "ItemBaseLevel"         "1"
+
+    // Properties
+    //-----------------------------------------------------
+    "ItemCost"               "150"
+    "ItemSellable"           "0"
+    "ItemKillable"           "0"
+    "ItemDroppable"          "1"
+    "ItemInitialCharges"     "1"
+    "ItemHideCharges"        "1"
+    "ItemRequiresCharges"    "0"
+    "ItemStackable"          "0"
+    "ItemPermanent"          "0"
+    "ItemShareability"       "ITEM_FULLY_SHAREABLE"
+    "ItemShopTags"           "consumable"
+    "ItemQuality"            "consumable"
+
+    // Abilities
+    //-----------------------------------------------------
+    "AbilityCastPoint"              "0.0"
+    "AbilityCooldown"               "0"
+    "AbilityManaCost"               "0"   
+    
+    "AbilitySpecial"
+    {
+        "01"
+        {
+            "var_type"              "FIELD_INTEGER"
+            "life_gained"           "1"
+        }
+    }
+
+    "OnSpellStart"
+    {
+        "SpendCharge" 
+        {}
+        "RunScript"
+        {
+            "Target"        "TARGET"
+            "ScriptFile"    "items.lua"
+            "Function"      "CheeseEaten"
+            "life_gained"   "%life_gained"
+        }
+
+        "FireSound"
+        {
+            "Target"        "CASTER"
+            "EffectName"    "DOTA_Item.Cheese.Activate"
+        }
+
+        //"FireEffect"
+        //{
+        //    "Target"            "TARGET"
+        //    "EffectName"        "particles/items3_fx/mango_active.vpcf"
+        //    "EffectAttachType"  "follow_origin"
+        //}
+    }
+
+    "OnOwnerDied"
+    {
+      "RunScript"
+      {
+        "Target"      "TARGET"
+        "ScriptFile"  "items.lua"
+        "Function"    "DropItemOnDeath"
+      }
+    }  
+  }
 }

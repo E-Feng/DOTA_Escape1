@@ -21,6 +21,16 @@ function MangoEaten( event )
     event.target:GiveMana(mana)
 end
 
+function CheeseEaten(event)
+    local lifeGained = event.life_gained
+    GameRules.Lives = GameRules.Lives + lifeGained
+    local msg = {
+                  message = "Cheese eaten! " .. tostring(GameRules.Lives) .. " lives remaining!",
+                  duration = 2.0
+                }
+    FireGameEvent("show_center_message", msg)
+end
+
 function DropItemOnDeath(event) 
     local killedUnit = EntIndexToHScript( event.caster_entindex )
     local itemName = tostring(event.ability:GetAbilityName())

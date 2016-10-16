@@ -35,11 +35,11 @@
 		"DOTA_Tooltip_ability_escapetest_empty5"						"Empty Ability"
 		"DOTA_Tooltip_ability_escapetest_empty6"						"Empty Ability"
 
-		"DOTA_Tooptip_ability_gale_custom"								"Venomous Gale"
-		"DOTA_Tooptip_ability_gale_custom_Description"					""
-		"DOTA_Tooptip_modifier_poison_slow"								"Venomous Gale Slow"
-		"DOTA_Tooptip_modifier_poison_slow_Description"					""
-		
+		"DOTA_Tooltip_ability_gale_custom"								"Venomous Gale"
+		"DOTA_Tooltip_ability_gale_custom_Description"					""
+		"DOTA_Tooltip_modifier_poison_slow"								"Venomous Gale Slow"
+		"DOTA_Tooltip_modifier_poison_slow_Description"					"Slows by 3% each stack"
+
 		//------------------------
 		// Items
 		//------------------------
@@ -63,7 +63,7 @@
     	//------------------------
 		// Units
 		//------------------------
-		"npc_gate"														"Bouncer!"
+		"npc_gate"														"Gate!"
 		"npc_pudge"														"Pudge!"
 		"npc_th_dragon"													"Dragon!"
 		"npc_creep_tombstone"											"Zombie!"

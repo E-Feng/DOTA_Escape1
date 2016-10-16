@@ -114,27 +114,36 @@ function EscapeTest:OnHeroInGame(hero)
   hero:SetGold(0, false)
 
   -- Putting hero information into 'players' table
-  local playerIdx = hero:GetEntityIndex()
+  hero.id = hero:GetPlayerID()
   if hero:GetTeamNumber() == DOTA_TEAM_GOODGUYS then
-    Players[playerIdx] = hero
+    Players[hero.id] = hero
     EscapeTest:SetPlayerColor(hero)
     print("----------Player insertion into table----------")
-    print("PlayerIdx (", playerIdx, ") inserted into table")
+    print("Player Id (", hero.id, ") inserted into table")
     print("Table is now length ", TableLength(Players))
     print("----------Player insertion finished----------")
 
-    --[[ Experimental
+    -- Experimental GUI fix to show players on direside top hero bar
     playerCount = playerCount or 1
     hero.playerNumber = playerCount
     playerCount = playerCount + 1
     print("Hero", hero:GetUnitName(), "is player number", tostring(hero.playerNumber))
-    if hero.playerNumber >= 6 then
-      print(hero:GetTeamNumber())
-      PlayerResource:SetCustomTeamAssignment(hero:GetPlayerID(), DOTA_TEAM_BADGUYS)
-      hero:SetTeam(DOTA_TEAM_BADGUYS)
-      print(hero:GetTeamNumber())
-    end
-    ]]
+    -- Moves heroes spawning past 5 to direside then updates UI
+    if hero.playerNumber >= 6 and hero.playerNumber <= 10 then
+      for _,hero in pairs(Players) do
+        if hero.playerNumber >= 6 and hero.playerNumber <= 10 then
+          print("Player number", tostring(hero.playerNumber), "moved to direside")
+          PlayerResource:SetCustomTeamAssignment(hero.id, DOTA_TEAM_BADGUYS)
+          hero:SetTeam(DOTA_TEAM_BADGUYS)
+          PlayerResource:UpdateTeamSlot(hero.id, DOTA_TEAM_BADGUYS, 1)
+          -- Moves them back to radiant, update
+          Timers:CreateTimer(0.5, function()
+            PlayerResource:SetCustomTeamAssignment(hero.id, DOTA_TEAM_GOODGUYS)
+            hero:SetTeam(DOTA_TEAM_GOODGUYS)
+          end)
+        end
+      end
+    end   
   end
 end
 
@@ -182,18 +191,17 @@ function EscapeTest:InitEscapeTest()
   
 
   -- Initializes variables and tables
-  Lives = 4
   Players = {}
-  DeadHeroPos = {}
-  PartNum = {}
-  PartDummy = {}
   Extras = {}
   Parts = {}
   SunRayParts = {}
   MultVector = {}
   BoundsVector = {}
+  GameRules.Lives = 4
   GameRules.CLevel = 0
   GameRules.Checkpoint = Vector(0, 0, 0)
+
+  DOTA_TEAM_ZOMBIES = DOTA_TEAM_BADGUYS
 
   TeamColors = {}
   TeamColors[0] = {61, 210, 150} -- Teal
@@ -349,10 +357,14 @@ function EscapeTest:SetupMap()
   local level = 1
   EscapeTest:InitializeVectors()
   EscapeTest:SpawnEntities(level)
+
+  --print("Function test running")
+  --local var = "Test"
+  --EscapeTest[var]()
+  --print("Function done running")
 end
 
 function EscapeTest:SetPlayerColor(hero)
-  hero.id = hero:GetPlayerID()
   local color = TeamColors[hero.id]
   if color == nil then
     color = {255, 255, 255} -- white

@@ -387,7 +387,7 @@ function EscapeTest:SpawnEntities(level)
       print(item:GetName(), "(", item:GetEntityIndex(), ") has spawned at", pos)
       EntList[level][i][ENT_INDEX] = item:GetEntityIndex()
     elseif entvals[ENT_UNTIM] == 2 then
-      local unit = CreateUnitByName(entname, pos, true, nil, nil, DOTA_TEAM_BADGUYS)
+      local unit = CreateUnitByName(entname, pos, true, nil, nil, DOTA_TEAM_ZOMBIES)
       print(unit:GetUnitName(), "(", unit:GetEntityIndex(), ") has spawned at", pos)
       EntList[level][i][ENT_INDEX] = unit:GetEntityIndex()
       if entname == "npc_creep_patrol" then
@@ -410,7 +410,9 @@ function EscapeTest:SpawnEntities(level)
       end
     end
   end
-  if level == 3 then
+  if level == 1 then
+    EscapeTest:ExtraLifeSpawn()
+  elseif level == 3 then
     EscapeTest:RandomMangos()
     EscapeTest:PhaseWall()
     local give = "particles/misc/skill_give.vpcf"
@@ -504,40 +506,19 @@ function EscapeTest:InitializeVectors()
   end
 end
 
--- This function is to run a thinker to revive heroes upon "contact"
-function EscapeTest:ReviveThinker()
-  --print("Number of dead heroes is ", EscapeTest:TableLength(DeadHeroPos))
-  if TableLength(DeadHeroPos) > 0 then
-    for idx1,hero in pairs(Players) do
-      if hero:IsAlive() then
-        --surr = Entities:FindAllInSphere(hero:GetAbsOrigin(), hero:GetModelRadius())
-        --for i,ent in pairs(surr) do
-        --  print(i, ent, ent:GetClassname(), ent:GetName())
-        --end
-        for idx2,deadpos in pairs(DeadHeroPos) do
-          if CalcDist(hero:GetAbsOrigin(), deadpos) < hero:GetModelRadius() then
-            local deadhero = EntIndexToHScript(idx2)
-            EscapeTest:HeroRevived(deadhero, hero)
-          end
-        end
-      end
-    end
-  end
-end    
-
 -- This function runs to save the location and particle spawn upon hero killed
 function EscapeTest:HeroKilled(hero, attacker, ability)
   -- Saves position of killed hero into table
   local playerIdx = hero:GetEntityIndex()
   -- If hero steps onto grass/lava origin is moved closer to path
-  DeadHeroPos[playerIdx] = hero:GetAbsOrigin()
-  if ability ~= nil then
+  hero.deadHeroPos = hero:GetAbsOrigin()
+  if ability then
     if ability:GetAbilityName() == "self_immolation" then
       --print("Moving back location of hero and particle")
       local shift = -30
       local forVector = hero:GetForwardVector():Normalized()
       local newDeadPos = hero:GetAbsOrigin() + forVector*shift
-      DeadHeroPos[playerIdx] = newDeadPos
+      hero.deadHeroPos = newDeadPos
       --print("Normalized forward vector: ", forVector)
       --print("Altered position: ", newDeadPos)
     end
@@ -550,20 +531,19 @@ function EscapeTest:HeroKilled(hero, attacker, ability)
 
   -- Creates a particle at position and saves particleIdx into tables
   local part = BeaconPart[hero.id]
-  local dummy = CreateUnitByName("npc_dummy_unit", DeadHeroPos[playerIdx], true, nil, nil, DOTA_TEAM_GOODGUYS)
+  local dummy = CreateUnitByName("npc_dummy_unit", hero.deadHeroPos, true, nil, nil, DOTA_TEAM_GOODGUYS)
   dummy:FindAbilityByName("dummy_unit"):SetLevel(1)
   local beacon = ParticleManager:CreateParticle(part, PATTACH_ABSORIGIN, dummy)
-  ParticleManager:SetParticleControl(beacon, 0, DeadHeroPos[playerIdx])
-  PartNum[playerIdx] = beacon
-  PartDummy[playerIdx] = dummy:GetEntityIndex()
+  ParticleManager:SetParticleControl(beacon, 0, hero.deadHeroPos)
+  hero.particleNumber = beacon
+  hero.dummyPartEntIndex = dummy:GetEntityIndex()
   --print("Particle Created: ", beacon, "under player ", playerIdx, "dummy index: ", PartDummy[playerIdx])
 end
 
 -- This function revives the hero once the thinker has found "contact"
 function EscapeTest:HeroRevived(deadhero, alivehero)
   -- Sets up location of hero and respawns there
-  local playerIdx = deadhero:GetEntityIndex()
-  local xLocation = DeadHeroPos[playerIdx]
+  local xLocation = deadhero.deadHeroPos
 
   -- Takes the average of alivehero and x location to respawn closer to path
   local respawnLoc = AveragePos(alivehero:GetAbsOrigin(), xLocation)
@@ -573,19 +553,70 @@ function EscapeTest:HeroRevived(deadhero, alivehero)
   --print("Hero Idx(", playerIdx, ") respawned at ", respawnLoc)
 
   -- Finds the particle index and deletes it
-  local partID = PartNum[playerIdx]
+  local partID = deadhero.particleNumber
   ParticleManager:DestroyParticle(partID, true)
   --print("Particle: ", partID, "destroyed after respawn")
 
-  -- Removes table entry of revived hero, particle, and dummy
-  DeadHeroPos[playerIdx] = nil
-  PartNum[playerIdx] = nil
+  -- Resetting and updating
+  deadhero.deadHeroPos = nil
+  deadhero.particleNumber = nil
 
-  local dummy = EntIndexToHScript(PartDummy[playerIdx])
+  local dummy = EntIndexToHScript(deadhero.dummyPartEntIndex)
   if dummy and dummy:IsAlive() then
     dummy:RemoveSelf()
   end
-  PartDummy[playerIdx] = nil
+  deadhero.dummyPartEntIndex = nil
+end
+
+-- This function is to run a thinker to revive heroes upon "contact"
+function EscapeTest:ReviveThinker()
+  --print("Number of dead heroes is ", EscapeTest:TableLength(DeadHeroPos))
+  for _, alivehero in pairs(Players) do
+    if alivehero:IsAlive() then
+      --surr = Entities:FindAllInSphere(hero:GetAbsOrigin(), hero:GetModelRadius())
+      --for i,ent in pairs(surr) do
+      --  print(i, ent, ent:GetClassname(), ent:GetName())
+      --end
+      for _, deadhero in pairs(Players) do
+        if deadhero.deadHeroPos then
+          if CalcDist(alivehero:GetAbsOrigin(), deadhero.deadHeroPos) < alivehero:GetModelRadius() then
+            EscapeTest:HeroRevived(deadhero, alivehero)
+          end
+        end
+      end
+    end
+  end
+end
+
+-- This function is a thinker to check if everyone is dead and revives them
+function EscapeTest:CheckpointThinker()
+  local numPlayers = TableLength(Players)
+  local deadHeroes = 0
+  for _,hero in pairs(Players) do
+    if not hero:IsAlive() then
+      deadHeroes = deadHeroes + 1
+    end
+  end
+  --print("Dead heroes:", deadHeroes, "Total:", numPlayers, "Lives:", GameRules.Lives)
+  -- print("CheckpointThinker started, players:", numPlayers, "dead players:", numdead)
+  if GameRules.Lives >= 0 and numPlayers == deadHeroes and numPlayers ~= 0 then
+    deadHeroes = 0
+    EscapeTest:ReviveAll()
+    GameRules.Lives = GameRules.Lives - 1
+    if GameRules.Lives >= 0 then
+      local msg = {
+                    message = "You now have " .. tostring(GameRules.Lives) .. " lives remaining!",
+                    duration = 5.0
+                  }
+      FireGameEvent("show_center_message", msg)
+    end
+  elseif GameRules.Lives < 0 then
+    Timers:CreateTimer(3, function()
+      GameRules:SetSafeToLeave(true)
+      GameRules:SetCustomVictoryMessage("You're loser!")
+      GameRules:SetGameWinner(DOTA_TEAM_ZOMBIES)
+    end)
+  end
 end
 
 -- This function revives everyone when they all die at last checkpoint
@@ -601,40 +632,15 @@ function EscapeTest:ReviveAll()
     hero:RespawnHero(false, false, false)
     hero:SetBaseMoveSpeed(300)
     hero:Stop()
+    hero.deadHeroPos = nil
     print("Hero Idx(", i, ") respawned at ", hero:GetAbsOrigin())
     local particle = ParticleManager:CreateParticle("particles/units/heroes/hero_omniknight/omniknight_purification.vpcf", PATTACH_ABSORIGIN_FOLLOW, hero)
+    if hero.particleNumber then
+      ParticleManager:DestroyParticle(hero.particleNumber, true)
+    end
   end
   EmitGlobalSound("Hero_Omniknight.Purification")
-  for _,part in pairs(PartNum) do
-    ParticleManager:DestroyParticle(part, true)
-  end
-  DeadHeroPos = {}
-  PartNum = {}
   print("-------All respawned, reset--------------")
-end
-
--- This function is a thinker to check if everyone is dead and revives them
-function EscapeTest:CheckpointThinker()
-  local numplayers = TableLength(Players)
-  local numdead = TableLength(DeadHeroPos)
-  -- print("CheckpointThinker started, players:", numplayers, "dead players:", numdead)
-  if Lives >= 0 and numplayers == numdead and numplayers ~= 0 then
-    EscapeTest:ReviveAll()
-    Lives = Lives - 1
-    if Lives > 0 then
-      local msg = {
-                    message = "You now have " .. tostring(Lives) .. " lives remaining!",
-                    duration = 5.0
-                  }
-      FireGameEvent("show_center_message", msg)
-    end
-  elseif Lives < 0 then
-    Timers:CreateTimer(3, function()
-      GameRules:SetSafeToLeave(true)
-      GameRules:SetGameWinner(DOTA_TEAM_BADGUYS)
-      GameRules:SetCustomVictoryMessage("You're loser!")
-    end)
-  end
 end
 
 -- This function cleans up the previous level
@@ -672,6 +678,20 @@ function EscapeTest:CleanLevel(level)
   Parts = {}
   Extras = {}
   print("----------Cleaning level done------------")
+end
+
+-- This function spawns the cheeses for extra life in the beginning
+function EscapeTest:ExtraLifeSpawn()
+  print("Spawning extra life cheeses")
+  local pos = Entities:FindByName(nil, "cheese_spawn"):GetAbsOrigin()
+  local cheeseNum = 10
+  local r = 200
+  for i = 1,cheeseNum do
+    local item = CreateItem("item_cheese_custom", nil, nil)
+    local angle = math.rad((i-1)*(360/cheeseNum))
+    local spawnPos = Vector(pos.x + r*math.cos(angle), pos.y + r*math.sin(angle), pos.z)
+    CreateItemOnPositionSync(spawnPos, item)
+  end
 end
 
 -- This function is a thinker for a gate to move upon full mana
@@ -786,7 +806,7 @@ function EscapeTest:PhaseWall()
     if GameRules.CLevel == 3 then
       for i = 1,units do
         local yi = bot + (i-1)*increment
-        local unit = CreateUnitByName("npc_creep_patrol", Vector(x, yi, 128), true, nil, nil, DOTA_TEAM_BADGUYS)
+        local unit = CreateUnitByName("npc_creep_patrol", Vector(x, yi, 128), true, nil, nil, DOTA_TEAM_ZOMBIES)
         Timers:CreateTimer(0.5, function()
           unit:MoveToPosition(Vector(x+dist, yi, 128))
           Timers:CreateTimer(wait, function()
@@ -816,7 +836,7 @@ function EscapeTest:RandomWanderUnits()
       local x = RandomFloat(topleft.x, botright.x)
       local y = RandomFloat(topleft.y, botright.y)
       local pos = Vector(x, y, 128)
-      local unit = CreateUnitByName("npc_creep_patrol", pos, true, nil, nil, DOTA_TEAM_BADGUYS)
+      local unit = CreateUnitByName("npc_creep_patrol", pos, true, nil, nil, DOTA_TEAM_ZOMBIES)
       EscapeTest:WanderThinker(unit)
       table.insert(Extras, unit:GetEntityIndex())
     end)
@@ -934,7 +954,7 @@ function EscapeTest:TinyThinker(unit, entvals)
                                       false)
       if #table > 0 then
         print("Throwing unit")
-        local dummy = CreateUnitByName("npc_dummy_unit", loctoss, true, nil, nil, DOTA_TEAM_BADGUYS)
+        local dummy = CreateUnitByName("npc_dummy_unit", loctoss, true, nil, nil, DOTA_TEAM_ZOMBIES)
         unit:CastAbilityOnTarget(dummy, abil, -1)
         UTIL_Remove(dummy)
       end
@@ -965,7 +985,7 @@ function EscapeTest:PheonixInitial(entvals)
   for i,angle in pairs(angles) do
     local theta = math.rad(angle)
     local pos = Vector(spawn.x + r*math.cos(theta), spawn.y + r*math.sin(theta), spawn.z)
-    local unit = CreateUnitByName("npc_pheonix", pos, true, nil, nil, DOTA_TEAM_BADGUYS)
+    local unit = CreateUnitByName("npc_pheonix", pos, true, nil, nil, DOTA_TEAM_ZOMBIES)
     unit:SetForwardVector(Vector(math.cos(theta), math.sin(theta), 0))
     local abil = unit:FindAbilityByName("sun_ray_datadriven")
     Timers:CreateTimer(2, function()
@@ -1070,7 +1090,7 @@ function EscapeTest:CartyThinker()
   local amtweighted = {1, 1, 2, 2, 2, 2, 3}
   for i = 1,units do
     local xi = x1 + (i-1)*increment
-    local unit = CreateUnitByName("npc_dota_badguys_siege", Vector(xi, pos1.y - movedist + 500, pos1.z), true, nil, nil, DOTA_TEAM_BADGUYS)
+    local unit = CreateUnitByName("npc_dota_badguys_siege", Vector(xi, pos1.y - movedist + 500, pos1.z), true, nil, nil, DOTA_TEAM_ZOMBIES)
     unit:SetAttackCapability(DOTA_UNIT_CAP_NO_ATTACK)
     unit:AddAbility("patrol_unit_passive"):SetLevel(1)
     unit:AddAbility("kill_radius"):SetLevel(1)
@@ -1136,7 +1156,7 @@ function EscapeTest:CartyThinker()
       local rand = RandomFloat(0,1)
       if val then
         local xi = x1 + (i-1)*increment
-        local unit = CreateUnitByName("npc_dota_badguys_siege", Vector(xi, pos1.y, pos1.z), true, nil, nil, DOTA_TEAM_BADGUYS)
+        local unit = CreateUnitByName("npc_dota_badguys_siege", Vector(xi, pos1.y, pos1.z), true, nil, nil, DOTA_TEAM_ZOMBIES)
         unit:SetBaseMoveSpeed(275)
         unit:SetAttackCapability(DOTA_UNIT_CAP_NO_ATTACK)
         unit:AddAbility("patrol_unit_passive"):SetLevel(1)

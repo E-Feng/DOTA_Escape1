@@ -124,10 +124,10 @@
     
     // Team
     //----------------------------------------------------------------
-    "TeamName"                  "DOTA_TEAM_BADGUYS"
-    "CombatClassAttack"         "DOTA_COMBAT_CLASS_ATTACK_BASIC"
-    "CombatClassDefend"         "DOTA_COMBAT_CLASS_DEFEND_BASIC"
-    "UnitRelationshipClass"             "DOTA_NPC_UNIT_RELATIONSHIP_TYPE_DEFAULT"
+    //"TeamName"                  "DOTA_TEAM_BADGUYS"
+    //"CombatClassAttack"         "DOTA_COMBAT_CLASS_ATTACK_BASIC"
+    //"CombatClassDefend"         "DOTA_COMBAT_CLASS_DEFEND_BASIC"
+    //"UnitRelationshipClass"             "DOTA_NPC_UNIT_RELATIONSHIP_TYPE_DEFAULT"
   }
 
   "npc_gate"
@@ -268,10 +268,10 @@
     
     // Team
     //----------------------------------------------------------------
-    "TeamName"                  "DOTA_TEAM_BADGUYS"
-    "CombatClassAttack"         "DOTA_COMBAT_CLASS_ATTACK_BASIC"
-    "CombatClassDefend"         "DOTA_COMBAT_CLASS_DEFEND_BASIC"
-    "UnitRelationshipClass"             "DOTA_NPC_UNIT_RELATIONSHIP_TYPE_DEFAULT"
+    //"TeamName"                  "DOTA_TEAM_BADGUYS"
+    //"CombatClassAttack"         "DOTA_COMBAT_CLASS_ATTACK_BASIC"
+    //"CombatClassDefend"         "DOTA_COMBAT_CLASS_DEFEND_BASIC"
+    //"UnitRelationshipClass"             "DOTA_NPC_UNIT_RELATIONSHIP_TYPE_DEFAULT"
   }
 
   "npc_th_dragon"

@@ -51,8 +51,8 @@ end
 
 function InvisCustom(event)
 	local caster = event.caster
-	local mindur = 1
-	local maxdur = 2
+	local mindur = 0.5
+	local maxdur = 1.75
 	Timers:CreateTimer(function()
 		if IsValidEntity(caster) then
 			local randwait = RandomFloat(1, 5)
@@ -87,7 +87,7 @@ function ZombieSpawn(event)
 		Timers:CreateTimer(function()
 			if IsValidEntity(caster) then
 				local pos = caster:GetAbsOrigin()
-				local unit = CreateUnitByName("npc_creep_tombstone", pos, true, nil, nil, DOTA_TEAM_BADGUYS)
+				local unit = CreateUnitByName("npc_creep_tombstone", pos, true, nil, nil, DOTA_TEAM_ZOMBIES)
 				FindClearSpaceForUnit(unit, pos, true)
 				local angle = math.rad(RandomFloat(0, 360))
 				local newpos = Vector(pos.x + r*math.cos(angle), pos.y + r*math.sin(angle), pos.z)

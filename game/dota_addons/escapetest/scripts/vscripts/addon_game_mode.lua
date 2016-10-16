@@ -49,7 +49,7 @@ function Precache( context )
   PrecacheModel("models/heroes/life_stealer/life_stealer.vmdl", context)
   PrecacheModel("models/creeps/lane_creeps/creep_bad_siege/creep_bad_siege.vmdl", context)
   PrecacheModel("models/creeps/lane_creeps/creep_bad_siege/creep_bad_siege_deathsim.vmdl", context)
-
+  
   -- Sounds can precached here like anything else
   PrecacheResource("soundfile", "soundevents/game_sounds_heroes/game_sounds_gyrocopter.vsndevts", context)
   PrecacheResource("soundfile", "soundevents/game_sounds_heroes/game_sounds_omniknight.vsndevts", context)
@@ -64,6 +64,7 @@ function Precache( context )
   PrecacheItemByNameSync("example_ability", context)
   PrecacheItemByNameSync("item_example_item", context)
   PrecacheItemByNameSync("item_mango_custom", context)
+  PrecacheItemByNameSync("item_cheese_custom", context)
 
   -- Entire heroes (sound effects/voice/models/particles) can be precached with PrecacheUnitByNameSync
   -- Custom units from npc_units_custom.txt can also have all of their abilities and precache{} blocks precached in this way
