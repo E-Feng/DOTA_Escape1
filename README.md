@@ -3,9 +3,9 @@ Escape The Undying Dead - Dota2 Custom Game
 
 Steamcommunity link: https://steamcommunity.com/sharedfiles/filedetails/?id=630768961
 
-![Game Preview.gif](https://media.giphy.com/media/Lq73TMWoNdcXQN0Mqo/giphy.gif)
+![Game Preview.gif](https://thumbs.gfycat.com/SilentMedicalGangesdolphin-size_restricted.gif)
 
-<img src="https://media.giphy.com/media/Lq73TMWoNdcXQN0Mqo/giphy.gif" width="690" height="388" />
+<img src="https://thumbs.gfycat.com/SilentMedicalGangesdolphin-size_restricted.gif" width="690" height="388" />
 
 A fun co-op maze/escape game popularized back in Warcraft II arcade games. Recreated in Dota2 custom game using inspiration from past games.
 
