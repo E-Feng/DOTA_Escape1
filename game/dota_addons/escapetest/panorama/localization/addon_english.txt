@@ -1,4 +1,0 @@
-"addon"
-{
-	"DOTA_GoodGuys"   								"Survivors"
-}

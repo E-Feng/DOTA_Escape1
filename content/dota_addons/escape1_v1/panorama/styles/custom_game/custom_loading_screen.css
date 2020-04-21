@@ -1,0 +1,82 @@
+@define TotalLength: 40s;
+@define TimingFunc: linear;
+@define IterationCount: 1;
+@define AnimationDelay: 0s;
+
+.AddonLoadingRoot
+{
+	width: 100%;
+    height: 100%;
+    background-color: black;
+	background-position: center center;
+	background-size: cover;
+}
+
+#TitlePanel
+{
+	horizontal-align: left;
+	vertical-align: bottom;
+	margin-bottom: 150px;
+	margin-left: 100px;
+	flow-children: right;
+}
+
+#Rules1
+{
+  margin-bottom: -15px;
+  vertical-align: center;
+  font-size: 40px;
+  color: #cccccc;
+  text-shadow: 2px 2px 2px #000000;
+}
+
+#AddonTitle
+{
+	margin-bottom: -15px;
+	vertical-align: center;
+	text-transform: uppercase;
+	font-size: 80px;
+	color: #cccccc;
+	text-shadow: 2px 2px 2px #000000;
+}
+
+.SeqImg
+{
+	background-repeat: no-repeat;
+	background-position: 100% 100%;
+	background-size: 100% 100%;
+}
+
+.ProBg
+{
+	background-repeat: repeat;
+	background-position: center center;
+	background-size: 100% 100%;
+}
+
+#CustomBg
+{
+  margin-top: 150px;
+  margin-left: 100px;
+    overflow: clip;
+  pre-transform-scale2d: 1.0;
+}
+
+#gamemode
+{
+  margin-left: 0px;
+}
+
+@keyframes 'gamemode_anim'
+{
+  0%
+  {
+    transform: translateX( 0px ) translateY( 0px );
+    pre-transform-scale2d: .8;
+  }
+
+  100%
+  {
+    transform: translateX( 0px ) translateY( -200px );
+  }
+}
