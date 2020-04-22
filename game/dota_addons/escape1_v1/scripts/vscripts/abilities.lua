@@ -52,7 +52,7 @@ end
 function InvisCustom(event)
 	local caster = event.caster
 	local mindur = 0.5
-	local maxdur = 1.75
+	local maxdur = 1.25
 	local part1 = "particles/items3_fx/glimmer_cape_initial.vpcf"
 	local part2 = "particles/items3_fx/glimmer_cape_initial_flash.vpcf"
 	Timers:CreateTimer(function()
