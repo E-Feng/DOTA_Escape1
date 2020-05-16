@@ -297,9 +297,82 @@ end
 function EscapeTest:OnPlayerChat(keys)
   local teamonly = keys.teamonly
   local userID = keys.userid
-  local playerID = self.vUserIds[userID]:GetPlayerID()
-
+  local playerID = keys.playerid
   local text = keys.text
+
+  local numPlayers
+
+	if text == "-votekill" then
+		if not GameRules.VoteOngoing then
+			print("Kill all vote started")
+			GameRules.VoteOngoing = true
+			Vote = {}
+			numPlayers = 0
+			for i,hero in pairs(Players) do
+				if PlayerResource:IsConnected(i) then
+					numPlayers = numPlayers + 1
+				end
+			end
+			votesNeeded = math.max(math.floor(numPlayers/2) + 1, 2) -- Min of 2 votes
+			print("Num players and num votes", numPlayers, votesNeeded)
+
+			local name = PlayerResource:GetPlayerName(playerID)
+			name = string.sub(name, 1, 15)
+			local init_msg = {
+				text = name .. " started kill all vote, need " .. tostring(votesNeeded) .. " to succeed. <br/>Type '-votekill' to vote.",
+				duration = 8.0,
+				style = {color="red", ["font-size"]="60px"}
+			}
+			Notifications:TopToAll(init_msg)
+			table.insert(Vote, playerID)
+			Timers:CreateTimer(30, function()
+				if GameRules.VoteOngoing == true then
+					print("Vote failed")
+					GameRules.VoteOngoing = false
+					Vote = {}
+					local fail_msg = {
+						text = "Vote has failed, type '-votekill' to try again.",
+						duration = 4.0,
+						style = {color="red", ["font-size"]="60px"}
+					}
+					Notifications:TopToAll(fail_msg)
+				end
+			end)
+		else
+			--playerID = RandomInt(0, 9)
+			if not TableContains(Vote, playerID) and #Vote > 0 then
+				print("Player ID ", playerID, " has voted")
+				table.insert(Vote, playerID)
+				local name = PlayerResource:GetPlayerName(playerID)
+				name = string.sub(name, 1, 15)
+				local numVotes = #Vote
+				local vote_msg = {
+					text = name .. " voted: " .. tostring(numVotes) .. "/" .. tostring(votesNeeded),
+					duration = 4.0,
+					style = {color="red", ["font-size"]="60px"}
+				}
+				Notifications:TopToAll(vote_msg)
+				if numVotes >= votesNeeded then
+					print("Vote passed, killing all")
+					Vote = {}	
+					local success_msg = {
+						text = "Vote successful, killing all",
+						duration = 4.0,
+						style = {color="red", ["font-size"]="60px"}
+					}
+					Notifications:TopToAll(success_msg)			
+					Timers:CreateTimer(4, function()	
+						GameRules.VoteOngoing = false
+						for i,hero in pairs(Players) do
+							if hero:IsAlive() then
+								hero:SetBaseMagicalResistanceValue(25)
+							end
+						end
+					end)
+				end
+			end
+		end
+	end
 end
 
 -- An entity died
@@ -491,6 +564,7 @@ function EscapeTest:HeroKilled(hero, attacker, ability)
   -- Saves position of killed hero into table
   local playerIdx = hero:GetEntityIndex()
   -- If hero steps onto grass/lava origin is moved closer to path
+  hero:SetBaseMagicalResistanceValue(25)
   hero.deadHeroPos = hero:GetAbsOrigin()
   if ability then
     if ability:GetAbilityName() == "self_immolation" then
@@ -590,19 +664,23 @@ function EscapeTest:CheckpointThinker()
   -- print("CheckpointThinker started, players:", numPlayers, "dead players:", numdead)
   if GameRules.Lives >= 0 and numPlayers == deadHeroes and numPlayers ~= 0 then
     deadHeroes = 0
-    EscapeTest:ReviveAll()
-    GameRules.Lives = GameRules.Lives - 1
-    if GameRules.Lives >= 0 then
-      local msg = {
-        text = "You now have " .. tostring(GameRules.Lives) .. " lives remaining!",
-        duration = 5.0,
-        style={color="red", ["font-size"]="80px"}
-      }
-      Notifications:TopToAll(msg)
-      GameRules:SendCustomMessage("You now have " .. tostring(GameRules.Lives) .. " lives remaining!", 0, 1)
-    end
+    Timers:CreateTimer(0.5, function()
+      EscapeTest:ReviveAll()
+      GameRules.Lives = GameRules.Lives - 1
+      if GameRules.Lives >= 0 then
+        local msg = {
+          text = "You now have " .. tostring(GameRules.Lives) .. " lives remaining!",
+          duration = 5.0,
+          style={color="red", ["font-size"]="80px"}
+        }
+        Notifications:TopToAll(msg)
+        GameRules:SendCustomMessage("You now have " .. tostring(GameRules.Lives) .. " lives remaining!", 0, 1)
+      end
+    end)
   elseif GameRules.Lives < 0 then
+    WebApi:SendDeleteRequest()
     Timers:CreateTimer(2, function()
+      GameRules.Ongoing = false
       GameRules:SetCustomVictoryMessage("You're loser!")
       GameRules:SetGameWinner(DOTA_TEAM_ZOMBIES)
       GameRules:SetSafeToLeave(true)
@@ -614,6 +692,7 @@ end
 function EscapeTest:ReviveAll()
   print("--------Everyone died, reviving all----------")
   local respawnLoc = GameRules.Checkpoint
+  local caster
   for i,hero in pairs(Players) do
     hero:SetBaseMagicalResistanceValue(100)
     hero:SetRespawnPosition(respawnLoc)
@@ -627,8 +706,9 @@ function EscapeTest:ReviveAll()
     if hero.particleNumber then
       ParticleManager:DestroyParticle(hero.particleNumber, true)
     end
+    caster = hero
   end
-  EmitGlobalSound("Hero_Omniknight.Purification")
+  EmitSoundOnLocationForAllies(respawnLoc, "Hero_Omniknight.Purification", caster)
   print("-------All respawned, reset--------------")
 end
 
@@ -714,7 +794,7 @@ function EscapeTest:GateThinker(unit, entvals)
       if abil:IsOwnersManaEnough() then
         unit:CastAbilityImmediately(abil, -1)
       end
-      return 1.0
+      return 0.05
     else
       return
     end
@@ -1084,7 +1164,8 @@ function EscapeTest:CartyThinker()
   local pos2 = Entities:FindByName(nil, "carty_loc2"):GetAbsOrigin()
   local x1 = pos1.x
   local x2 = pos2.x
-  local units = 26
+  local x1_0 = x1 - 75 -- Just for the initial block, moving left
+  local units = 28
   local half = units/2
   local spawnold = {}
   local spawnnew = {}
@@ -1098,8 +1179,8 @@ function EscapeTest:CartyThinker()
   local mode = 1
   local modelimit = 4
   local amtweighted = {1, 1, 2, 2, 2, 2, 3}
-  for i = 1,units do
-    local xi = x1 + (i-1)*increment
+  for i = 1,(units + 2) do -- Adding extra units
+    local xi = x1_0 + (i-1)*increment
     local unit = CreateUnitByName("npc_dota_badguys_siege", Vector(xi, pos1.y - movedist + 500, pos1.z), true, nil, nil, DOTA_TEAM_ZOMBIES)
     unit:SetAttackCapability(DOTA_UNIT_CAP_NO_ATTACK)
     unit:AddAbility("patrol_unit_passive"):SetLevel(1)

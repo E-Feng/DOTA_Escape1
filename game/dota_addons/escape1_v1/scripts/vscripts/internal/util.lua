@@ -124,6 +124,14 @@ function TableLength(table)
   end
 end
 
+-- Return key of table from given value in subkey
+function GetTableKeyFromValue(tbl, subkey, val)
+  for k, v in pairs(tbl) do
+      if v[subkey] == val then return k end
+  end
+  return nil
+end
+
 function AveragePos(pos1, pos2)
   dist = Vector((pos1.x + pos2.x)/2, (pos1.y + pos2.y)/2, (pos1.z + pos2.z)/2)
   return dist

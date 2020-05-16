@@ -2,6 +2,7 @@
 
 require('internal/util')
 require('escapetest')
+require('webapi')
 
 function Precache( context )
 --[[
@@ -28,6 +29,8 @@ function Precache( context )
   PrecacheResource("particle", "particles/units/heroes/hero_bounty_hunter/bounty_hunter_track_trail_circle.vpcf", context)
   PrecacheResource("particle", "particles/units/heroes/hero_pudge/pudge_meathook.vpcf", context)
   PrecacheResource("particle", "particles/units/heroes/hero_puck/puck_phase_shift.vpcf", context)
+  PrecacheResource("particle", "particles/items3_fx/mango_active.vpcf", context)
+  PrecacheResource("particle", "particles/units/heroes/hero_undying/undying_tnt_wlk_golem.vpcf", context) 
   PrecacheResource("particle_folder", "particles/test_particle", context)
   PrecacheResource("particle_folder", "particles/beacons", context)
   PrecacheResource("particle_folder", "particles/misc", context)

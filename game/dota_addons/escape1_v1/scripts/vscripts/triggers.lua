@@ -53,18 +53,25 @@ function UpdateCheckpoint(trigger)
 			EscapeTest:CleanLevel(level-1)
 			EscapeTest:SpawnEntities(level)
 			EscapeTest:MoveCreeps(level, {})
+			WebApi:UpdateTimeSplit(level)
 		elseif level == 7 then
-			Timers:CreateTimer(3, function()
-				GameRules:SetGameWinner(DOTA_TEAM_GOODGUYS)
-				GameRules:SetSafeToLeave(true)
-				GameRules:SetCustomVictoryMessage("You're winner!")
+			GameRules.Ongoing = false
+			WebApi:UpdateTimeSplit(level)
+			Timers:CreateTimer(0.1, function()
+				WebApi:FinalizeGameScoreAndSend()
+				WebApi:SendDeleteRequest()
+				Timers:CreateTimer(2, function()
+					GameRules:SetGameWinner(DOTA_TEAM_GOODGUYS)
+					GameRules:SetSafeToLeave(true)
+					GameRules:SetCustomVictoryMessage("You're winner!")
+				end)
 			end)
 		elseif level == 1 then
 		  --Removing all items
 		  for i = 0,10 do
-		    print(i)
+		    --print(i)
 		    local item = hero:GetItemInSlot(i)
-		    print(item)
+		    --print(item)
 		    if item then
 		      print("Removing item")
 		      hero:RemoveItem(item)
@@ -111,7 +118,7 @@ function SpawnMore1(trigger)
 		local vecnum = entvals[PAT_VECNM]
 		local entnum = entvals[ENT_TYPEN]
 		local entname = Ents[entnum]
-		local delay = entvals[PAT_DELAY]
+		local delay = RandomFloat(1, 3)
 		print(pos, vecnum, entnum, entname)
 		local unit = CreateUnitByName(entname, pos, true, nil, nil, DOTA_TEAM_BADGUYS)
 		Timers:CreateTimer(delay, function()

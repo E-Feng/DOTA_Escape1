@@ -3,5 +3,7 @@
   custom_net_tables =
   [
     "containers_lua",
+    "leaderboard",
+    "gamescore",
   ]
 }

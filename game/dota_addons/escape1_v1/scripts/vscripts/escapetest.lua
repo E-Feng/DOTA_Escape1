@@ -147,9 +147,9 @@ function EscapeTest:OnHeroInGame(hero)
 
   --Removing all items
   for i = 0,12 do
-    print(i)
+    --print(i)
     local item = hero:GetItemInSlot(i)
-    print(item)
+    --print(item)
     if item then
       print("Removing item")
       hero:RemoveItem(item)
@@ -218,10 +218,15 @@ function EscapeTest:OnGameInProgress()
   end)
 
     -- Starts the thinker to check if everyones dead and to revive
-  Timers:CreateTimer(10, function()
-    EscapeTest:CheckpointThinker()
-    return 1
+  Timers:CreateTimer(4, function()
+    if GameRules.Ongoing then
+      EscapeTest:CheckpointThinker()
+      return 2
+    end
   end)
+
+-- Setting up gamescore data collection
+  WebApi:InitGameScore() 
 end
 
 
@@ -231,6 +236,12 @@ end
 function EscapeTest:InitEscapeTest()
   EscapeTest = self
   DebugPrint('[ESCAPETEST] Starting to load EscapeTest escapetest...')
+  
+  	-- Grabbing data from DB first thing
+	Timers:CreateTimer(0.1, function()
+		WebApi:GetLeaderboard()
+		--GameRules:BotPopulate()
+	end)
 
   -- Call the internal function to set up the rules/behaviors specified in constants.lua
   -- This also sets up event hooks for all event handlers in events.lua
@@ -251,9 +262,13 @@ function EscapeTest:InitEscapeTest()
   Extras = {}
   MultVector = {}
   BoundsVector = {}
+  Vote = {}
+	votesNeeded = 6
   GameRules.Lives = 4
   GameRules.CLevel = 0
   GameRules.Checkpoint = Vector(0, 0, 0)
+  GameRules.Ongoing = true
+  GameRules.VoteOngoing = false
 
   DOTA_TEAM_ZOMBIES = DOTA_TEAM_BADGUYS
 
@@ -330,8 +345,8 @@ function EscapeTest:InitEscapeTest()
   -- Table for all ents (exc pat creeps) {item/unit/part, ent#, entindex, }
   EntList = {
               { -- Level 1
-                {1, ENT_MANGO, 0, "mango_loc1", nil, true, true},
-                {1, ENT_MANGO, 0, "mango_loc2", nil, true, true},
+                {1, ENT_MANGO, 0, "mango_loc1", nil, false, true},
+                {1, ENT_MANGO, 0, "mango_loc2", nil, false, true},
                 {1, ENT_CHEES, 0, "cheese1_1", nil},
                 {2, ENT_PATRL, 0, "spawner1",  "PatrolInitial", 1,  0.03, 300},
                 {2, ENT_PATRL, 0, "spawner2",  "PatrolInitial", 2,  0.03, 300},
@@ -343,8 +358,8 @@ function EscapeTest:InitEscapeTest()
                 {2, ENT_PATRL, 0, "spawner8",  "PatrolInitial", 8,  0.03, 300},
                 {2, ENT_PATRL, 0, "spawner9",  "PatrolInitial", 9,  4.00, 300},
                 {2, ENT_PATRL, 0, "spawner10", "PatrolInitial", 10, 9.00, 300},
-                {2, ENT_GATES, 0, "gate_loc1", "GateThinker", "gate_move1", true, Vector(-1,-1, 0), 1},
-                {2, ENT_GATES, 0, "gate_loc2", "GateThinker", "gate_move2", true, Vector( 0, 1, 0), 2},
+                {2, ENT_GATES, 0, "gate_loc1", "GateThinker", "gate_move1", false, Vector(-1,-1, 0), 1},
+                {2, ENT_GATES, 0, "gate_loc2", "GateThinker", "gate_move2", false, Vector( 0, 1, 0), 1},
               },
               { -- Level 2
                 {2, ENT_PUDGE, 0, "pudge_loc1", "PudgeThinker"},
@@ -368,8 +383,8 @@ function EscapeTest:InitEscapeTest()
               { -- Level 4
                 {2, ENT_VENOM, 0, "veno_loc1", "VenoThinker", 12, 0.03},
                 {2, ENT_VENOM, 0, "veno_loc2", "VenoThinker", 13, 4.00},
-                {1, ENT_MANGO, 0, "mango_loc3", nil, true, true},
-                {2, ENT_GATES, 0, "gate_loc4", "GateThinker", "gate_move4", true, Vector(0, -1, 0), 1},
+                {1, ENT_MANGO, 0, "mango_loc3", nil, false, true},
+                {2, ENT_GATES, 0, "gate_loc4", "GateThinker", "gate_move4", false, Vector(0, -1, 0), 1},
                 {2, ENT_TINYT, 0, "tiny_loc1", "TinyThinker", -90, 45, 1000},
                 {2, ENT_TINYT, 0, "tiny_loc2", "TinyThinker", 90, 270, 1000},
                 {2, ENT_TINYT, 0, "tiny_loc3", "TinyThinker", 225, 405, 800},
