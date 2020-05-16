@@ -16,7 +16,7 @@ Gameplay: https://www.youtube.com/watch?v=WM5hluQtQ7M
 ## Escape The Undying Dead 2: Vengeance (sequel)
 
 Preview: https://www.youtube.com/watch?v=7ScA5KILNRs \
-Workshop: https://steamcommunity.com/sharedfiles/filedetails/?id=630768961 \
+Workshop: https://steamcommunity.com/sharedfiles/filedetails/?id=2070583974 \
 Github: https://github.com/E-Feng/DOTA_Escape2 \
 Gameplay: https://www.youtube.com/watch?v=OhmL5BI3Mgo
 
