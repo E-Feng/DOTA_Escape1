@@ -5,6 +5,9 @@ local key = ""
 local dedicatedServerKey = IsDedicatedServer() and GetDedicatedServerKeyV2("1.0") or key
 local url = "https://dota-escape1.firebaseio.com/" .. dedicatedServerKey .. "/"
 
+--CustomNetTables:SetTableValue("serverKey", "serverKey", key)
+
+local leaderboard = {}
 local gamescore
 local numEntries = 0
 local maxEntries = 20
@@ -19,7 +22,6 @@ function WebApi:GetLeaderboard()
       print("GET request successful")
       local data = json.decode(response.Body)
       
-      local leaderboard = {}
       for _,v in pairs(data) do table.insert(leaderboard, v) end
       table.sort(leaderboard, function(a,b) return a.totaltime < b.totaltime end)
 
@@ -86,7 +88,7 @@ function WebApi:InitGameScore()
       duration = 60,
       style = {color="red", ["font-size"]="48px"}
     }
-    --Notifications:BottomToAll(msg)
+    Notifications:BottomToAll(msg)
   end
 end
 
@@ -107,6 +109,19 @@ end
 
 function WebApi:SendDeleteRequest()
   local deleteData = numEntries > maxEntries
+  --local deleteData = true
+
+  for _,entry in pairs(leaderboard) do
+    --DeepPrintTable(entry)
+    for _,time in pairs(entry.timesplits) do
+      --print(time)
+      if time == 0 then
+        deleteData = false
+      end
+    end
+  end
+
+  print("To delete data: ", deleteData)
 
   if (deleteData and slowestId) then
     print("Sending delete request")

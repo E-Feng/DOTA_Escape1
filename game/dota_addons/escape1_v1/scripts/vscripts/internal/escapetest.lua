@@ -8,6 +8,11 @@ function EscapeTest:_InitEscapeTest()
   GameRules:SetHeroSelectionTime( HERO_SELECTION_TIME )
   GameRules:SetPreGameTime( PRE_GAME_TIME)
   GameRules:SetPostGameTime( POST_GAME_TIME )
+
+  -- Added from updated barebones
+	GameRules:SetShowcaseTime(SHOWCASE_TIME)
+	GameRules:SetStrategyTime(STRATEGY_TIME)
+
   GameRules:SetTreeRegrowTime( TREE_REGROW_TIME )
   GameRules:SetUseCustomHeroXPValues ( USE_CUSTOM_XP_VALUES )
   GameRules:SetGoldPerTick(GOLD_PER_TICK)

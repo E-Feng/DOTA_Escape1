@@ -6,9 +6,13 @@ UNIVERSAL_SHOP_MODE = false             -- Should the main shop contain Secret S
 ALLOW_SAME_HERO_SELECTION = true        -- Should we let people select the same hero as each other
 
 HERO_SELECTION_TIME = 30                 -- How long should we let people select their hero?
-PRE_GAME_TIME = 1                       -- How long after people select their heroes should the horn blow and the game start?
+PRE_GAME_TIME = 2                       -- How long after people select their heroes should the horn blow and the game start?
 POST_GAME_TIME = 60                     -- How long should we let people look at the scoreboard before closing the server automatically?
 TREE_REGROW_TIME = 60.0                 -- How long should it take individual trees to respawn after being cut down/destroyed?
+
+-- Added from updated barebones
+STRATEGY_TIME = 5                       -- How long should strategy time last? Bug: You can buy items during strategy time and it will not be spent!
+SHOWCASE_TIME = 0                       -- How long should show case time be?
 
 GOLD_PER_TICK = 0                       -- How much gold should players get per tick?
 GOLD_TICK_TIME = 0                      -- How long should we wait in seconds between gold ticks?
