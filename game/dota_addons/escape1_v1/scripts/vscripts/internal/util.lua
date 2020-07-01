@@ -113,6 +113,12 @@ function CalcDist(pos1, pos2)
   return dist
 end
 
+function CalcDist2D(pos1, pos2)
+  dist = math.sqrt(math.pow(pos1.x - pos2.x,2) + math.pow(pos1.y - pos2.y,2))
+  --print("Calcuate distance is ", dist)
+  return dist
+end
+
 function TableLength(table)
   --print("Testing function TableLength")
   if table ~= {} then
@@ -130,6 +136,16 @@ function GetTableKeyFromValue(tbl, subkey, val)
       if v[subkey] == val then return k end
   end
   return nil
+end
+
+function GetRandomTableKey(t)
+  -- iterate over whole table to get all keys
+  local keyset = {}
+  for k in pairs(t) do
+      table.insert(keyset, k)
+  end
+  -- now you can reliably return a random key
+  return keyset[RandomInt(1, #keyset)]
 end
 
 function AveragePos(pos1, pos2)

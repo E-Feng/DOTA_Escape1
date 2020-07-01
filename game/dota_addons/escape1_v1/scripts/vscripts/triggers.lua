@@ -68,7 +68,7 @@ function UpdateCheckpoint(trigger)
 			end)
 		elseif level == 1 then
 		  --Removing all items
-		  for i = 0,10 do
+		  --[[for i = 0,10 do
 		    --print(i)
 		    local item = hero:GetItemInSlot(i)
 		    --print(item)
@@ -79,7 +79,7 @@ function UpdateCheckpoint(trigger)
 		  end
 		  hero:AddItemByName("item_boots")
 		  hero:AddItemByName("item_stick")
-		  hero:AddItemByName("item_stick")			
+		  hero:AddItemByName("item_stick")]]
 		end
 		print("---------UpdateCheckpoint trigger finished--------")
 	end

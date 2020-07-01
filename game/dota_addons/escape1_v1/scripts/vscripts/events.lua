@@ -56,13 +56,20 @@ end
 
 -- An item was picked up off the ground
 function EscapeTest:OnItemPickedUp(keys)
-  DebugPrint( '[ESCAPETEST] OnItemPickedUp' )
-  DebugPrintTable(keys)
+	DebugPrint("[BAREBONES] OnItemPickedUp")
+	--PrintTable(keys)
 
-  local heroEntity = EntIndexToHScript(keys.HeroEntityIndex)
-  local itemEntity = EntIndexToHScript(keys.ItemEntityIndex)
-  local player = PlayerResource:GetPlayer(keys.PlayerID)
-  local itemname = keys.itemname
+	-- Find who picked up the item
+	local unit_entity
+	if keys.UnitEntitIndex then -- keys.UnitEntitIndex may be always nil
+		unit_entity = EntIndexToHScript(keys.UnitEntitIndex)
+	elseif keys.HeroEntityIndex then
+		unit_entity = EntIndexToHScript(keys.HeroEntityIndex)
+	end
+
+	local item_entity = EntIndexToHScript(keys.ItemEntityIndex)
+	local playerID = keys.PlayerID
+	local item_name = keys.itemname
 end
 
 -- A player has reconnected to the game.  This function can be used to repaint Player-based particles or change
@@ -588,8 +595,11 @@ function EscapeTest:HeroKilled(hero, attacker, ability)
   local dummy = CreateUnitByName("npc_dummy_unit", hero.deadHeroPos, true, nil, nil, DOTA_TEAM_GOODGUYS)
   dummy:FindAbilityByName("dummy_unit"):SetLevel(1)
   dummy:AddNewModifier(dummy, nil, "modifier_phased", {})
+  
   local beacon = ParticleManager:CreateParticle(part, PATTACH_ABSORIGIN, dummy)
   ParticleManager:SetParticleControl(beacon, 0, hero.deadHeroPos)
+  ParticleManager:SetParticleControl(beacon, 1, Vector(hero.beaconSize, 0, 0))
+
   hero.particleNumber = beacon
   hero.dummyPartEntIndex = dummy:GetEntityIndex()
   --print("Particle Created: ", beacon, "under player ", playerIdx, "dummy index: ", PartDummy[playerIdx])
@@ -633,7 +643,7 @@ end
 
 -- This function is to run a thinker to revive heroes upon "contact"
 function EscapeTest:ReviveThinker()
-  --print("Number of dead heroes is ", EscapeTest:TableLength(DeadHeroPos))
+  --print("Number of dead heroes is ", barebones:TableLength(DeadHeroPos))
   for _, alivehero in pairs(Players) do
     if alivehero:IsAlive() then
       --surr = Entities:FindAllInSphere(hero:GetAbsOrigin(), hero:GetModelRadius())
@@ -642,8 +652,26 @@ function EscapeTest:ReviveThinker()
       --end
       for _, deadhero in pairs(Players) do
         if deadhero.deadHeroPos then
-          if CalcDist(alivehero:GetAbsOrigin(), deadhero.deadHeroPos) < alivehero:GetModelRadius() then
+          local reviveRadius = alivehero.reviveRadius
+
+          -- Patreon larger x
+          if deadhero.largerXMod then
+            reviveRadius = math.min(reviveRadius * 1.5, REVIVE_RAD_MAX)
+          end
+
+          if CalcDist2D(alivehero:GetAbsOrigin(), deadhero.deadHeroPos) < reviveRadius then
+            --print("Radius ", alivehero:GetName(), reviveRadius)
             EscapeTest:HeroRevived(deadhero, alivehero)
+
+            -- Patreon phase boots
+            Timers:CreateTimer(0, function()
+              if alivehero.phaseMod then
+                alivehero:AddNewModifier(alivehero, nil, "modifier_phased", {duration = 1})
+              end
+              if deadhero.phaseMod then
+                deadhero:AddNewModifier(deadhero, nil, "modifier_phased", {duration = 1})
+              end
+            end)
           end
         end
       end
@@ -765,13 +793,16 @@ end
 function EscapeTest:ExtraLifeSpawn()
   print("Spawning extra life cheeses")
   local pos = Entities:FindByName(nil, "cheese_spawn"):GetAbsOrigin()
-  local cheeseNum = 10
-  local r = 200
+  local cheeseNum = 6
+  local r = 175
   for i = 1,cheeseNum do
     local item = CreateItem("item_cheese_custom", nil, nil)
     local angle = math.rad((i-1)*(360/cheeseNum))
     local spawnPos = Vector(pos.x + r*math.cos(angle), pos.y + r*math.sin(angle), pos.z)
     CreateItemOnPositionSync(spawnPos, item)
+
+    -- For patreon courier
+    _G.Cheeses[item:GetEntityIndex()] = "spawned"    
   end
 end
 
@@ -784,8 +815,11 @@ end
 -- This function is a thinker for a gate to move upon full mana
 function EscapeTest:GateThinker(unit, entvals)
   print("Thinker has started on unit", unit:GetUnitName(), "(", unit:GetEntityIndex(), ")")
+  local hullRadius = 100
+
+  unit.moved = false
   unit:SetMana(5-entvals[GAT_NUMBR])
-  unit:SetHullRadius(100)
+  unit:SetHullRadius(hullRadius)
   unit:SetForwardVector(entvals[GAT_ORIEN])
   local abil = unit:FindAbilityByName("gate_unit_passive")
   Timers:CreateTimer(function()
@@ -793,8 +827,32 @@ function EscapeTest:GateThinker(unit, entvals)
       -- print("Has mana?", abil:IsOwnersManaEnough(), unit:GetUnitName(), "(", unit:GetEntityIndex(), ")")
       if abil:IsOwnersManaEnough() then
         unit:CastAbilityImmediately(abil, -1)
+        unit:SetHullRadius(25)
+        unit.moved = true
       end
-      return 0.05
+      if not unit.moved then
+        -- Check for phase boots through
+        local foundUnits = FindUnitsInRadius(DOTA_TEAM_GOODGUYS,
+                                             unit:GetAbsOrigin(),
+                                             nil,
+                                             hullRadius,
+                                             DOTA_UNIT_TARGET_TEAM_FRIENDLY,
+                                             DOTA_UNIT_TARGET_HERO,
+                                             DOTA_UNIT_TARGET_FLAG_NONE,
+                                             FIND_ANY_ORDER,
+                                             false)
+        for _,foundUnit in pairs(foundUnits) do
+          --print("Found", foundUnit:GetName())
+          local posU = unit:GetAbsOrigin()
+          local posF = foundUnit:GetAbsOrigin()
+
+          local shift = -(hullRadius - CalcDist2D(posU, posF) + 25)
+          local forwardVec = foundUnit:GetForwardVector():Normalized()
+          local newOrigin = posF + forwardVec*shift
+          foundUnit:SetAbsOrigin(newOrigin)
+        end
+      end
+      return 0.03
     else
       return
     end

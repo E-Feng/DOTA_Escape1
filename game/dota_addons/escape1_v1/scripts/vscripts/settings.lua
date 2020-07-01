@@ -1,6 +1,11 @@
+-- Constants
+BEACON_NORMAL = 84
+BEACON_LARGE = 140
+
+REVIVE_RAD_MIN = 80
+REVIVE_RAD_MAX = 200
+
 -- In this file you can set up all the properties and settings for your game mode.
-
-
 ENABLE_HERO_RESPAWN = false              -- Should the heroes automatically respawn on a timer or stay dead until manually respawned
 UNIVERSAL_SHOP_MODE = false             -- Should the main shop contain Secret Shop items as well as regular items
 ALLOW_SAME_HERO_SELECTION = true        -- Should we let people select the same hero as each other

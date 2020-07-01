@@ -159,9 +159,24 @@ function EscapeTest:OnHeroInGame(hero)
   hero:AddItemByName("item_boots")
   hero:AddItemByName("item_stick")
   hero:AddItemByName("item_stick")
+  hero:AddItemByName("item_patreon_get_cheese1")
+  hero:AddItemByName("item_patreon_chest")
 
   hero:SetBaseMagicalResistanceValue(100)
   hero:SetGold(0, false)
+
+
+  -- Initializing hero parameters
+  local modelRad = hero:GetModelRadius()
+  local reviveRad = math.max(modelRad, REVIVE_RAD_MIN)
+  local scaledRad = math.pow(reviveRad, 0.6) * 7 + (REVIVE_RAD_MIN - math.pow(REVIVE_RAD_MIN, 0.6) * 7)
+  --print("Radius for reviving", modelRad, scaledRad)
+
+  hero.patreonLevel = 0
+  hero.beaconSize = BEACON_NORMAL    -- Normal:84   Large:120 for patreon item
+  hero.reviveRadius = scaledRad
+  hero.largerXMod = false
+  hero.phaseMod = false
 
   --hero:AddNewModifier(hero, nil, "modifier_client_convars", {})
 
@@ -241,7 +256,21 @@ function EscapeTest:InitEscapeTest()
 	Timers:CreateTimer(0.1, function()
 		WebApi:GetLeaderboard()
 		--GameRules:BotPopulate()
-	end)
+  end)
+  
+  local attempts = 0
+	local MAX_ATTEMPTS = 5
+
+	Timers:CreateTimer(0.2, function()
+		print("PATREONS: Running function initially")
+		if not WebApi.patreonsLoaded and attempts < MAX_ATTEMPTS then
+			WebApi:GetPatreons()
+		else
+			return
+		end
+		attempts = attempts + 1
+		return 20
+	end)	
 
   -- Call the internal function to set up the rules/behaviors specified in constants.lua
   -- This also sets up event hooks for all event handlers in events.lua
@@ -262,13 +291,18 @@ function EscapeTest:InitEscapeTest()
   Extras = {}
   MultVector = {}
   BoundsVector = {}
+  _G.Cheeses = {}
+
   Vote = {}
-	votesNeeded = 6
+  votesNeeded = 6
+  GameRules.Ongoing = true
+  GameRules.VoteOngoing = false
+
+  _G.patreonUsed = false
+
   GameRules.Lives = 4
   GameRules.CLevel = 0
   GameRules.Checkpoint = Vector(0, 0, 0)
-  GameRules.Ongoing = true
-  GameRules.VoteOngoing = false
 
   DOTA_TEAM_ZOMBIES = DOTA_TEAM_BADGUYS
 
@@ -285,16 +319,16 @@ function EscapeTest:InitEscapeTest()
   TeamColors[9] = {140, 42, 244} -- Purple
 
   BeaconPart = {}
-  BeaconPart[0] = "particles/beacons/kunkka_spell_x_spot_mark_fxset_teal.vpcf"
-  BeaconPart[1] = "particles/beacons/kunkka_spell_x_spot_mark_fxset_yellow.vpcf" 
-  BeaconPart[2] = "particles/beacons/kunkka_spell_x_spot_mark_fxset_pink.vpcf" 
-  BeaconPart[3] = "particles/beacons/kunkka_spell_x_spot_mark_fxset_orange.vpcf" 
-  BeaconPart[4] = "particles/beacons/kunkka_spell_x_spot_mark_fxset_blue.vpcf" 
-  BeaconPart[5] = "particles/beacons/kunkka_spell_x_spot_mark_fxset_green.vpcf" 
-  BeaconPart[6] = "particles/beacons/kunkka_spell_x_spot_mark_fxset_brown.vpcf" 
-  BeaconPart[7] = "particles/beacons/kunkka_spell_x_spot_mark_fxset_dred.vpcf" 
-  BeaconPart[8] = "particles/beacons/kunkka_spell_x_spot_mark_fxset_olive.vpcf" 
-  BeaconPart[9] = "particles/beacons/kunkka_spell_x_spot_mark_fxset_purple.vpcf" 
+  BeaconPart[0] = "particles/beacons/kunkka_x_marks_teal.vpcf"
+  BeaconPart[1] = "particles/beacons/kunkka_x_marks_yellow.vpcf" 
+  BeaconPart[2] = "particles/beacons/kunkka_x_marks_pink.vpcf" 
+  BeaconPart[3] = "particles/beacons/kunkka_x_marks_orange.vpcf" 
+  BeaconPart[4] = "particles/beacons/kunkka_x_marks_blue.vpcf" 
+  BeaconPart[5] = "particles/beacons/kunkka_x_marks_green.vpcf" 
+  BeaconPart[6] = "particles/beacons/kunkka_x_marks_brown.vpcf" 
+  BeaconPart[7] = "particles/beacons/kunkka_x_marks_dred.vpcf" 
+  BeaconPart[8] = "particles/beacons/kunkka_x_marks_olive.vpcf" 
+  BeaconPart[9] = "particles/beacons/kunkka_x_marks_purple.vpcf" 
 
   -- Table for multiple patrol creeps
   MultPatrol = {

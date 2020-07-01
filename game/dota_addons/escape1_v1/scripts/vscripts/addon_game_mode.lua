@@ -31,6 +31,7 @@ function Precache( context )
   PrecacheResource("particle", "particles/units/heroes/hero_puck/puck_phase_shift.vpcf", context)
   PrecacheResource("particle", "particles/items3_fx/mango_active.vpcf", context)
   PrecacheResource("particle", "particles/units/heroes/hero_undying/undying_tnt_wlk_golem.vpcf", context) 
+  PrecacheResource("particle", "particles/addons_gameplay/pit_lava_sparks.vpcf", context)
   PrecacheResource("particle_folder", "particles/test_particle", context)
   PrecacheResource("particle_folder", "particles/beacons", context)
   PrecacheResource("particle_folder", "particles/misc", context)
@@ -64,6 +65,8 @@ function Precache( context )
   PrecacheResource("soundfile", "soundevents/game_sounds_heroes/game_sounds_life_stealer.vsndevts", context)
   PrecacheResource("soundfile", "soundevents/game_sounds_heroes/game_sounds_puck.vsndevts", context)
   PrecacheResource("soundfile", "soundevents/game_sounds_heroes/game_sounds_dark_seer.vsndevts", context)
+  PrecacheResource("soundfile", "soundevents/game_sounds_heroes/game_sounds_ogre_magi.vsndevts", context)
+  PrecacheResource("soundfile", "soundevents/game_sounds_ui_imported.vsndevts", context)
   PrecacheResource("soundfile", "soundevents/game_sounds_items.vsndevts", context)
 
   -- Entire items can be precached by name
@@ -72,6 +75,15 @@ function Precache( context )
   PrecacheItemByNameSync("item_example_item", context)
   PrecacheItemByNameSync("item_mango_custom", context)
   PrecacheItemByNameSync("item_cheese_custom", context)
+
+  -- Patreon items
+  PrecacheItemByNameSync("item_patreon_chest", context)
+  PrecacheItemByNameSync("item_patreon_get_cheese1", context)
+  PrecacheItemByNameSync("item_patreon_get_cheese2", context)
+  PrecacheItemByNameSync("item_patreon_larger_x", context)
+  PrecacheItemByNameSync("item_patreon_wind_lace", context)
+  PrecacheItemByNameSync("item_patreon_phoenix_ash", context)
+  PrecacheItemByNameSync("item_patreon_phase", context)
 
   -- Entire heroes (sound effects/voice/models/particles) can be precached with PrecacheUnitByNameSync
   -- Custom units from npc_units_custom.txt can also have all of their abilities and precache{} blocks precached in this way
