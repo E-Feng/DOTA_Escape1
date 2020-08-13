@@ -42,7 +42,7 @@ function WebApi:GetLeaderboard()
       slowestTime = leaderboard[numEntries].totaltime
       slowestId = GetTableKeyFromValue(data, "totaltime", slowestTime)
 
-      slowestTime = math.min(slowestTime, 1440)
+      slowestTime = math.min(slowestTime, 6000)
 
       local cropped = {unpack(leaderboard, 1, maxEntries)}
       print("Sending updated leaderboard results to panaroma")
@@ -78,7 +78,7 @@ function WebApi:GetPatreons()
             if WebApi.patreons[k] == nil then
               WebApi.patreons[k] = tonumber(v.level)
             else
-              WebApi.patreons[k] = math.max(v.level, WebApi.patreons[k])
+              WebApi.patreons[k] = WebApi.patreons[k] + tonumber(v.level)
             end
           end
         end
