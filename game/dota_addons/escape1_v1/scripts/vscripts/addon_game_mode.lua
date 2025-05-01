@@ -29,6 +29,7 @@ function Precache( context )
   PrecacheResource("particle", "particles/units/heroes/hero_bounty_hunter/bounty_hunter_track_trail_circle.vpcf", context)
   PrecacheResource("particle", "particles/units/heroes/hero_pudge/pudge_meathook.vpcf", context)
   PrecacheResource("particle", "particles/units/heroes/hero_puck/puck_phase_shift.vpcf", context)
+  PrecacheResource("particle", "particles/units/heroes/hero_jakiro/jakiro_macropyre.vpcf", context)
   PrecacheResource("particle", "particles/items3_fx/mango_active.vpcf", context)
   PrecacheResource("particle", "particles/units/heroes/hero_undying/undying_tnt_wlk_golem.vpcf", context) 
   PrecacheResource("particle", "particles/addons_gameplay/pit_lava_sparks.vpcf", context)
@@ -71,10 +72,11 @@ function Precache( context )
 
   -- Entire items can be precached by name
   -- Abilities can also be precached in this way despite the name
-  PrecacheItemByNameSync("example_ability", context)
+  PrecacheItemByNameSync("macropyre_custom", context)
   PrecacheItemByNameSync("item_example_item", context)
   PrecacheItemByNameSync("item_mango_custom", context)
   PrecacheItemByNameSync("item_cheese_custom", context)
+  PrecacheItemByNameSync("item_blink_custom", context)
 
   -- Patreon items
   PrecacheItemByNameSync("item_patreon_chest", context)
@@ -89,6 +91,7 @@ function Precache( context )
   -- Custom units from npc_units_custom.txt can also have all of their abilities and precache{} blocks precached in this way
   PrecacheUnitByNameSync("npc_dota_hero_ancient_apparition", context)
   PrecacheUnitByNameSync("npc_dota_hero_enigma", context)
+  PrecacheUnitByNameSync("npc_dota_hero_tiny", context)
   PrecacheUnitByNameSync("npc_dummy_unit", context)
   PrecacheUnitByNameSync("npc_creep_patrol", context)
   PrecacheUnitByNameSync("npc_gate", context)

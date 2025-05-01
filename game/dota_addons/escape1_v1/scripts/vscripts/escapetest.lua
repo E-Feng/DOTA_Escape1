@@ -36,6 +36,7 @@ require('events')
 require('items')
 require('abilities')
 require('triggers')
+require('patrols')
 
 --[[
   This function should be used to set up Async precache calls at the beginning of the gameplay.
@@ -141,6 +142,7 @@ function EscapeTest:OnHeroInGame(hero)
     hero:AddAbility("escapetest_empty" .. i):SetLevel(1)
   end
   hero:AddAbility("self_immolation"):SetLevel(1)
+
   --hero:AddAbility("sun_ray_datadriven"):SetLevel(1)
   --hero:SetMana(1000)
   hero:SetAbilityPoints(0)
@@ -157,10 +159,14 @@ function EscapeTest:OnHeroInGame(hero)
   end
 
   hero:AddItemByName("item_boots")
-  hero:AddItemByName("item_stick")
-  hero:AddItemByName("item_stick")
+  -- hero:AddItemByName("item_stick")
+  -- hero:AddItemByName("item_stick")
   hero:AddItemByName("item_patreon_get_cheese1")
   hero:AddItemByName("item_patreon_chest")
+
+  if tostring(PlayerResource:GetSteamID(0)) == "76561197965802278" then
+    hero:AddItemByName("item_blink_custom")
+  end
 
   hero:SetBaseMagicalResistanceValue(100)
   hero:SetGold(0, false)
@@ -242,6 +248,23 @@ function EscapeTest:OnGameInProgress()
 
 -- Setting up gamescore data collection
   WebApi:InitGameScore() 
+
+  	-- Setting up bot spawn for solo players
+	local nPlayers = PlayerResource:GetPlayerCount()
+	if nPlayers == 1 then
+		local playerId
+    for _,hero in pairs(Players) do
+      playerId = hero:GetPlayerID()
+    end
+
+		local randomHero = GetRandomHeroName()
+		local spawn = Entities:FindByName(nil, "checkpoint1"):GetAbsOrigin()
+
+		local bot = GameRules:AddBotPlayerWithEntityScript(randomHero, "Buddy", DOTA_TEAM_GOODGUYS, nil, false)
+		bot:SetControllableByPlayer(playerId, true)
+		FindClearSpaceForUnit(bot, spawn, true)
+		bot.safe = true
+	end
 end
 
 
@@ -370,11 +393,13 @@ function EscapeTest:InitEscapeTest()
            "npc_venomancer",
            "npc_dota_hero_tiny",
            "npc_aggro",
+           "npc_dummy_unit"
          }
 
   ENT_MANGO = 1; ENT_CHEES = 2; ENT_PATRL = 3; ENT_GATES = 4;
   ENT_PUDGE = 5; ENT_DRAGN = 6; ENT_TOMBS = 7; ENT_VENOM = 8;  
-  ENT_TINYT = 9; ENT_AGGRO = 10;
+  ENT_TINYT = 9; ENT_AGGRO = 10;	ENT_MULTI_ = 11; 
+
   
   -- Table for all ents (exc pat creeps) {item/unit/part, ent#, entindex, }
   EntList = {
@@ -385,10 +410,13 @@ function EscapeTest:InitEscapeTest()
                 {2, ENT_PATRL, 0, "spawner1",  "PatrolInitial", 1,  0.03, 300},
                 {2, ENT_PATRL, 0, "spawner2",  "PatrolInitial", 2,  0.03, 300},
                 {2, ENT_PATRL, 0, "spawner3",  "PatrolInitial", 3,  0.03, 300},
-                {2, ENT_PATRL, 0, "spawner4",  "PatrolInitial", 4,  0.03, 300},
-                {2, ENT_PATRL, 0, "spawner5",  "PatrolInitial", 5,  0.03, 300},
-                {2, ENT_PATRL, 0, "spawner6",  "PatrolInitial", 6,  0.03, 300},
-                {2, ENT_PATRL, 0, "spawner7",  "PatrolInitial", 7,  0.03, 300},
+
+                -- {2, ENT_PATRL, 0, "spawner4",  "PatrolInitial", 4,  0.09, 300},
+                -- {2, ENT_PATRL, 0, "spawner5",  "PatrolInitial", 5,  0.09, 300},
+                -- {2, ENT_PATRL, 0, "spawner6",  "PatrolInitial", 6,  0.09, 300},
+                -- {2, ENT_PATRL, 0, "spawner7",  "PatrolInitial", 7,  0.09, 300},
+                {2, ENT_MULTI_, 0, "spawner6", "WallPatrolThinker", "waypoint6", 120, 0, 295},
+
                 {2, ENT_PATRL, 0, "spawner8",  "PatrolInitial", 8,  0.03, 300},
                 {2, ENT_PATRL, 0, "spawner9",  "PatrolInitial", 9,  4.00, 300},
                 {2, ENT_PATRL, 0, "spawner10", "PatrolInitial", 10, 9.00, 300},
@@ -483,6 +511,7 @@ function EscapeTest:InitEscapeTest()
   BAT_VECNM = 6;
   VEN_VECNM = 6; VEN_DELAY = 7;
   TIN_ANGL1 = 6; TIN_ANGL2 = 7; TIN_DISTS = 8;
+  MLT_GOALS = 6; MLT_RADII = 7; MLT_SPACE = 8; MLT_MVSPD = 9;
 
   -- Loads the level
   EscapeTest:SetupMap()

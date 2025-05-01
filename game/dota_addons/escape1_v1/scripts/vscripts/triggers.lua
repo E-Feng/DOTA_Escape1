@@ -1,8 +1,13 @@
 function OnStartSafety(trigger)
 	local ent = trigger.activator
 	if not ent then return end
-	--print(ent:GetName(), " has stepped on trigger")
-	if ent:IsRealHero() and ent:IsAlive() then
+	if not ent:IsHero() then return end
+
+	ent.isSafe = true
+	-- print(ent:GetName(), " has stepped on trigger")
+	-- print(ent:IsRealHero(), ent:IsAlive())
+
+	if ent:IsRealHero() then
 		ent:SetBaseMagicalResistanceValue(100)
 		return
 	end
@@ -11,8 +16,15 @@ end
 function OnEndSafety(trigger)
 	local ent = trigger.activator
 	if not ent then return end
-	--print(ent:GetName(), " has stepped off trigger")
-	if ent:IsRealHero() and ent:IsAlive() and ent:GetAbsOrigin().z < 135 then
+	if not ent:IsHero() then return end
+
+	local isSafe = ent.isSafe
+	-- print(ent:GetName(), " has stepped off trigger")
+
+	if ent:IsRealHero() and ent:IsAlive() and ent:GetAbsOrigin().z < 140 then
+		print(ent:GetName(), " has stepped off trigger, killing")
+
+		ent.isSafe = false
 		ent:SetBaseMagicalResistanceValue(25)
 		return
 	end
@@ -88,7 +100,7 @@ end
 function SurgeTrigger(trigger)
 	print("Surge trigger activated")
 	local level = 1
-	local surgeunits = {11, 12, 13}
+	local surgeunits = {8, 9, 10}
 	for _,val in pairs(surgeunits) do
 		local entind = EntList[level][val][ENT_INDEX]
 		local unit = EntIndexToHScript(entind)
@@ -99,7 +111,7 @@ end
 function InvisTrigger(trigger)
 	print("Invis trigger activated")
 	local level = 1
-	local invisunits = {11, 12, 13}
+	local invisunits = {8, 9, 10}
 	for _,val in pairs(invisunits) do
 		local entind = EntList[level][val][ENT_INDEX]
 		local unit = EntIndexToHScript(entind)
@@ -110,7 +122,7 @@ end
 function SpawnMore1(trigger)
 	print("Spawn more trigger activated")
 	local level = 1
-	local units = {11, 13}
+	local units = {8, 10}
 	local unit
 	for i,v in pairs(units) do
 		local entvals = EntList[level][v]

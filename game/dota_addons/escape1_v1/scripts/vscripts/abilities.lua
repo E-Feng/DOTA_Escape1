@@ -34,13 +34,17 @@ function SurgeCustom(event)
 			local randwait = RandomFloat(0, 2)
 			local randduration = RandomFloat(mindur, maxdur)
 			Timers:CreateTimer(randwait, function()
-				local surge_part = ParticleManager:CreateParticle(part, PATTACH_ABSORIGIN, caster)
-				EmitSoundOn("Hero_Dark_Seer.Surge", caster)
-				caster:SetBaseMoveSpeed(boosted_ms)
-				Timers:CreateTimer(randduration, function()
-					caster:SetBaseMoveSpeed(300)
-					ParticleManager:DestroyParticle(surge_part, true)
-				end)
+				if IsValidEntity(caster) then
+					local surge_part = ParticleManager:CreateParticle(part, PATTACH_ABSORIGIN, caster)
+					EmitSoundOn("Hero_Dark_Seer.Surge", caster)
+					caster:SetBaseMoveSpeed(boosted_ms)
+					Timers:CreateTimer(randduration, function()
+						if IsValidEntity(caster) then
+							caster:SetBaseMoveSpeed(300)
+							ParticleManager:DestroyParticle(surge_part, true)
+						end
+					end)
+				end
 			end)
 			return (randwait+randduration)
 		else
@@ -61,17 +65,23 @@ function InvisCustom(event)
 			local randduration = RandomFloat(mindur, maxdur)
 
 			Timers:CreateTimer(randwait, function()
-				local glimmer_part1 = ParticleManager:CreateParticle(part1, PATTACH_ABSORIGIN, caster)
-				local glimmer_part2 = ParticleManager:CreateParticle(part2, PATTACH_ABSORIGIN, caster)
-				EmitSoundOn("Item.GlimmerCape.Activate", caster)
-				Timers:CreateTimer(0.5, function()
-					caster:AddNewModifier(caster, nil, "modifier_invisible", {})
-					Timers:CreateTimer(randduration, function()
-						caster:RemoveModifierByName("modifier_invisible")
-						ParticleManager:DestroyParticle(glimmer_part1, true)
-						ParticleManager:DestroyParticle(glimmer_part2, true)
+				if IsValidEntity(caster) then
+					local glimmer_part1 = ParticleManager:CreateParticle(part1, PATTACH_ABSORIGIN, caster)
+					local glimmer_part2 = ParticleManager:CreateParticle(part2, PATTACH_ABSORIGIN, caster)
+					EmitSoundOn("Item.GlimmerCape.Activate", caster)
+					Timers:CreateTimer(0.5, function()
+						if IsValidEntity(caster) then
+							caster:AddNewModifier(caster, nil, "modifier_invisible", {})
+							Timers:CreateTimer(randduration, function()
+								if IsValidEntity(caster) then
+									caster:RemoveModifierByName("modifier_invisible")
+									ParticleManager:DestroyParticle(glimmer_part1, true)
+									ParticleManager:DestroyParticle(glimmer_part2, true)
+								end
+							end)
+						end
 					end)
-				end)
+				end
 			end)
 			return (randwait+randduration)
 		else

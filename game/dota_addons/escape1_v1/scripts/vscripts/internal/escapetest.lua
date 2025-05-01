@@ -28,6 +28,7 @@ function EscapeTest:_InitEscapeTest()
   GameRules:SetHideKillMessageHeaders( HIDE_KILL_BANNERS )
 
   GameRules:GetGameModeEntity():SetDaynightCycleDisabled(true)
+  GameRules:GetGameModeEntity():DisableHudFlip(true)
 
 
   -- This is multiteam configuration stuff

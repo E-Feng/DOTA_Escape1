@@ -228,12 +228,12 @@ function EscapeTest:OnConnectFull(keys)
 
   EscapeTest:_OnConnectFull(keys)
   
-  local entIndex = keys.index+1
+  --local entIndex = keys.index+1
   -- The Player entity of the joining user
-  local ply = EntIndexToHScript(entIndex)
+  --local ply = EntIndexToHScript(entIndex)
   
   -- The Player ID of the joining player
-  local playerID = ply:GetPlayerID()
+  --local playerID = ply:GetPlayerID()
 end
 
 -- This function is called whenever illusions are created and tells you which was/is the original entity
@@ -379,7 +379,42 @@ function EscapeTest:OnPlayerChat(keys)
 				end
 			end
 		end
+  elseif string.sub(text, 1, 1) == "-" and (string.find(text, "vote") or string.find(text, "kick")) then
+		GameRules:SendCustomMessage("Type -votekill to start a vote to kill all for reset/stuck/afk.", 0, 1)
 	end
+
+  	-- Implementing reset tool, only me and in cheatmode
+	local cond1 = tostring(PlayerResource:GetSteamID(0)) == "76561197965802278"
+	local cond2 = GameRules:IsCheatMode()
+
+	if cond1 and cond2 then
+		if text == "-r" then
+			local msg = {
+				text = "Resetting...",
+				duration = 5.0,
+				style = {color="red", ["font-size"]="60px"}
+			}
+			Notifications:TopToAll(msg)
+
+			-- Cleaning up level, changing currentLevel to stop looping timers
+			local level = GameRules.CLevel
+			EscapeTest:CleanLevel(level)
+			GameRules.CLevel = -1
+
+			-- Reloading level
+			SendToServerConsole("script_reload")
+
+			Timers:CreateTimer(5, function()
+				EscapeTest:InitializeGameConstants()
+				EscapeTest:InitializeVectors()
+				GameRules.CLevel = level
+
+				Timers:CreateTimer(1, function()
+					EscapeTest:SetUpLevel(level)
+				end)
+			end)
+		end
+  end
 end
 
 -- An entity died
@@ -451,7 +486,14 @@ function EscapeTest:DamageFilter(filterTable)
       end)
     end
   end
-  -- print(filterTable.damage)
+
+  	-- Fix for trigger touching issue
+	if filterTable.entindex_attacker_const == filterTable.entindex_victim_const then
+		if EntIndexToHScript(victim).isSafe then
+			filterTable.damage = 0
+		end
+	end
+  -- PrintTable(filterTable)
   return true
 end
 
@@ -515,7 +557,7 @@ function EscapeTest:CreepPatrol(unit, idx)
     if IsValidEntity(unit) then
       for i,waypoint in pairs(waypoints) do
         local posU = unit:GetAbsOrigin()
-        if CalcDist(posU, waypoint) < 5 then
+        if CalcDist2D(posU, waypoint) < 5 then
           unit:MoveToPosition(newpos[i])
         end
       end
@@ -859,6 +901,73 @@ function EscapeTest:GateThinker(unit, entvals)
   end)
 end
 
+-- This function is for creating a multi wall patrol
+function EscapeTest:WallPatrolThinker(dummyUnit, entvals)
+  print("Multi wall patrol started")
+
+  local units = {}
+
+  local defaultSpacing = 75
+  local radii = entvals[MLT_RADII] 
+  local spacing = (entvals[MLT_SPACE] == 0) and defaultSpacing or entvals[MLT_SPACE]
+  local ms = entvals[MLT_MVSPD]
+  local level = dummyUnit.level
+  local spawn = Entities:FindByName(nil, entvals[ENT_SPAWN]):GetAbsOrigin()
+  local goal = Entities:FindByName(nil, entvals[MLT_GOALS]):GetAbsOrigin()
+
+  dummyUnit:RemoveSelf()
+
+  -- Generating spawn/goal table for units
+  local spawnTb, goalTb = Patrols:GenerateMovingWallPositions(spawn, goal, radii, spacing)
+
+  -- Creating units along the line, lots of geometry
+  Timers:CreateTimer(0.5, function()
+    for i,_ in pairs(spawnTb) do
+      local pos1 = spawnTb[i]
+      local pos2 = goalTb[i]
+
+      local unit = CreateUnitByName("npc_creep_patrol", pos1, true, nil, nil, DOTA_TEAM_ZOMBIES)
+      unit:SetBaseMoveSpeed(ms)
+      unit.waypoints = {pos1, pos2}
+      unit.goal = pos2
+      table.insert(units, unit)
+
+      if ms > 550 then
+        unit:AddNewModifier(unit, nil, "modifier_dark_seer_surge", {})
+      end
+    end
+  end)
+
+  Timers:CreateTimer(1, function()
+    if (_G.currentLevel == level) or (_G.currentLevel == 0) then
+      local count = 0
+
+      for _,ent in pairs(units) do
+        ent:MoveToPosition(ent.goal)
+        if CalcDist2D(ent:GetAbsOrigin(), ent.goal) < 5 then
+          count = count + 1
+        end
+      end
+      if count == #units then
+        for _,ent in pairs(units) do
+          ent.goal = ent.waypoints[1]
+
+          local newtable = CopyTable(ent.waypoints)
+          local first = table.remove(newtable, 1)
+          table.insert(newtable, first)
+          ent.waypoints = newtable
+        end
+      end
+      return 0.25
+    else
+      for _,ent in pairs(units) do
+        ent:ForceKill(true)
+      end
+      return
+    end
+  end)  
+end
+
 -- This function is the thinker for pudge to randomly and periodically hook
 function EscapeTest:PudgeThinker(unit, entvals)
   print("Thinker has started on pudge (", unit:GetEntityIndex(), ")")
@@ -882,6 +991,8 @@ end
 function EscapeTest:DragonThinker(unit, entvals)
   print("Thinker has started on dragon (", unit:GetEntityIndex(), ")")
   local abil = unit:FindAbilityByName("macropyre_custom")
+  abil:SetLevel(1)
+
   local origin = unit:GetAbsOrigin()
   local pos2 = Entities:FindByName(nil, "mwayA2"):GetAbsOrigin()
   local pos4 = Entities:FindByName(nil, "mwayA4"):GetAbsOrigin()
@@ -904,6 +1015,40 @@ function EscapeTest:DragonThinker(unit, entvals)
         castpos.y = y2
       end
       unit:CastAbilityOnPosition(castpos, abil, -1)
+
+      local c = 0
+      local rat = 0.15
+      local dur = 3
+      Timers:CreateTimer(1.3, function()
+        if IsValidEntity(unit) and c * rat < dur then
+          local table = FindUnitsInLine(DOTA_TEAM_GOODGUYS, 
+            unit:GetAbsOrigin(), 
+            castpos, 
+            nil, 
+            120, 
+            DOTA_UNIT_TARGET_TEAM_BOTH, 
+            DOTA_UNIT_TARGET_HERO, 
+            FIND_ANY_ORDER
+          )
+          -- PrintTable(table)
+          for i,foundUnit in pairs(table) do
+            local damageTable = {
+              victim = foundUnit,
+              attacker = unit,
+              damage = 1,
+              damage_type = DAMAGE_TYPE_PURE
+            }
+            ApplyDamage(damageTable)
+            -- print(unit)
+          end
+
+          c = c + 1
+          return rat
+        else
+          return
+        end
+      end)
+
       return RandomFloat(3, 5)
     else
       return
@@ -945,8 +1090,8 @@ function EscapeTest:PhaseWall()
   local x = BoundsVector[boundpos][1].x
   local units = 6
   local increment = (top - bot)/(units - 1)
-  local dist = 10000
-  local wait = 11.5
+  local dist = 11000
+  local wait = 10.5
   Timers:CreateTimer(function()
     if GameRules.CLevel == 3 then
       for i = 1,units do
@@ -1233,7 +1378,7 @@ function EscapeTest:CartyThinker()
   local increment = (x2 - x1)/(units - 1)
   local movedist = 5000
   local y0 = pos1.y - movedist
-  local time = 17
+  local time = 15
   local mode = 1
   local modelimit = 4
   local amtweighted = {1, 1, 2, 2, 2, 2, 3}
